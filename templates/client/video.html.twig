@@ -1,0 +1,50 @@
+{#
+ # One film: a file of the site's plays in a <video> (nothing loaded before
+ # the click: preload="none"); a YouTube or Vimeo film is its poster and a
+ # button until the click, then the platform's iframe (youtube-nocookie,
+ # Vimeo with dnt=1).
+ #}
+{% extends 'layout1.html.twig' %}
+
+{% block title %}{{ video.title }}{% endblock %}
+{% block description %}{{ video.excerpt ?? video.headline ?? ('@music.video.description'|trans({title: video.title})) }}{% endblock %}
+{% block type %}video.other{% endblock %}
+
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('bundles/music/css/music.css') }}">{% endblock %}
+{% block javascripts %}{{ parent() }}<script src="{{ asset('bundles/music/js/player.js') }}" defer></script>{% endblock %}
+
+{% block content %}
+<article class="music music-video">
+    <header class="music-head">
+        <p class="music-eyebrow"><a href="{{ path('music_videos') }}">{{ '@music.videos.title'|trans }}</a></p>
+        <h1>{{ video.title }}</h1>
+        {% if video.headline %}<p class="music-lead">{{ video.headline }}</p>{% endif %}
+    </header>
+
+    {% if video.local %}
+    <div class="music-poster"><video controls playsinline preload="none"{% if video.poster %} poster="{{ video.poster }}"{% endif %}><source src="{{ video.file }}"></video></div>
+    {% elseif video.embedUrl %}
+    <div class="music-poster" data-music-embed>
+        <template><iframe src="{{ video.embedUrl }}" title="{{ video.title }}" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen loading="lazy"></iframe></template>
+        {% if video.poster %}<img src="{{ video.poster }}" alt="">{% endif %}
+        <button type="button" class="music-poster-play" data-music-embed-play aria-label="{{ '@music.video.play'|trans({title: video.title}) }}"><i class="fa-solid fa-play" aria-hidden="true"></i></button>
+        {% if video.duration %}<span class="music-poster-duration">{{ video.duration|music_duration }}</span>{% endif %}
+    </div>
+    <p class="music-video-consent">{{ (video.youtubeId ? '@music.video.consent_youtube' : '@music.video.consent_vimeo')|trans }}{% if video.watchUrl %} · <a href="{{ video.watchUrl }}" rel="noopener" target="_blank">{{ '@music.video.watch_there'|trans }}</a>{% endif %}</p>
+    {% endif %}
+
+    <p class="music-video-meta">
+        {%- set meta = [video.venue, video.recordedAt ? video.recordedAt|format_date('long') : null, video.work ? video.work ~ '' : null]|filter(v => v) -%}
+        {{ meta|join(' · ') }}
+    </p>
+    {% set performers_line = music_performers(video) %}
+    {% if performers_line %}<p class="music-performers">{{ '@music.release.with'|trans({performers: performers_line}) }}</p>{% endif %}
+    {% if video.excerpt %}<div class="music-prose"><p>{{ video.excerpt }}</p></div>{% endif %}
+    {% if video.release %}<p>{{ '@music.video.from_release'|trans }} <a href="{{ path('music_release', {slug: video.release.slug}) }}">{{ video.release.title }}</a></p>{% endif %}
+
+    {% if others|length %}
+    <h2>{{ '@music.video.others'|trans }}</h2>
+    <div class="music-video-grid">{% for video in others %}{% include '@Music/client/_video_card.html.twig' %}{% endfor %}</div>
+    {% endif %}
+</article>
+{% endblock %}

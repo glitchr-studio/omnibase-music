@@ -1,0 +1,54 @@
+{#
+ # The repertoire: what the musician plays, grouped by formation (solo,
+ # concerto, chamber...), by composer or by period (?by=), and in each group
+ # the composers by surname with their works - what a programmer reads.
+ #}
+{% extends 'layout1.html.twig' %}
+
+{% block title %}{{ '@music.repertoire.title'|trans }}{% endblock %}
+{% block description %}{{ '@music.repertoire.description'|trans }}{% endblock %}
+
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('bundles/music/css/music.css') }}">{% endblock %}
+
+{% block content %}
+<section class="music music-repertoire-page">
+    <header class="music-head">
+        <p class="music-eyebrow">{{ '@music.repertoire.eyebrow'|trans }}</p>
+        <h1>{{ '@music.repertoire.title'|trans }}</h1>
+        <p class="music-lead">{{ '@music.repertoire.lead'|trans }}</p>
+    </header>
+
+    <nav class="music-repertoire-by" aria-label="{{ '@music.repertoire.group_by'|trans }}">
+        {% for choice in choices %}<a href="{{ path('music_repertoire', {by: choice}) }}" {{ by == choice ? 'aria-current="page"' }}>{{ ('@music.repertoire.by.' ~ choice)|trans }}</a>{% endfor %}
+    </nav>
+
+    {% if groups|length %}
+    <table class="music-repertoire">
+        {% for group, composers in groups %}
+        <tbody>
+            <tr><th scope="rowgroup" colspan="4">
+                {%- if by == 'formation' %}{{ ('@music.formation.' ~ group)|trans }}
+                {%- elseif by == 'period' %}{{ group ? ('@music.period.' ~ group)|trans : '@music.period.none'|trans }}
+                {%- else %}{{ group }}{% endif -%}
+            </th></tr>
+            {% for composer, works in composers %}
+                {% for work in works %}
+                <tr>
+                    <td>{% if loop.first and by != 'composer' %}<strong>{{ composer }}</strong>{% endif %}</td>
+                    <td>{{ work.fullTitle }}
+                        {%- if work.instrumentation %}<small>{{ work.instrumentation }}</small>{% endif %}
+                        {%- if work.movementList|length %}<details><summary>{{ '@music.repertoire.movements'|trans({count: work.movementList|length}) }}</summary><ol>{% for movement in work.movementList %}<li>{{ movement }}</li>{% endfor %}</ol></details>{% endif %}
+                    </td>
+                    <td class="is-num">{{ work.year }}</td>
+                    <td class="is-num">{{ work.duration ? '@music.repertoire.minutes'|trans({minutes: work.duration}) }}</td>
+                </tr>
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p class="music-empty">{{ '@music.repertoire.empty'|trans }}</p>
+    {% endif %}
+</section>
+{% endblock %}

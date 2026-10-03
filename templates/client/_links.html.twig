@@ -1,0 +1,15 @@
+{#
+ # Where a release is (music_links(release)): the label first - its block,
+ # its "buy it" button - then the platforms as pills, in Omnisong's order
+ # (Platform::rank()), each with its icon (music_platform_icon()). `show_label: false` leaves the label out when the
+ # page has already shown it.
+ #}
+{% if (label_first ?? true) and (show_label ?? true) %}{% include '@Music/client/_label.html.twig' with {release: release} only %}{% endif %}
+{% set platforms = release.platformLinks.all|filter(link => link.platform.value not in ['label', 'shop']) %}
+{% if platforms|length %}
+<p class="music-links-title">{{ '@music.links.title'|trans }}</p>
+<ul class="music-links">
+    {% for link in platforms %}<li><a href="{{ link.url }}" rel="noopener" target="_blank"><i class="{{ music_platform_icon(link.platform) }}" aria-hidden="true"></i><span>{{ link.title() }}</span></a></li>{% endfor %}
+</ul>
+{% endif %}
+{% if not (label_first ?? true) and (show_label ?? true) %}{% include '@Music/client/_label.html.twig' with {release: release} only %}{% endif %}

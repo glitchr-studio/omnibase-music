@@ -1,0 +1,22 @@
+{# The films, the featured first: posters only - nothing loads from a platform until one is opened. #}
+{% extends 'layout1.html.twig' %}
+
+{% block title %}{{ '@music.videos.title'|trans }}{% endblock %}
+{% block description %}{{ '@music.videos.description'|trans }}{% endblock %}
+
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('bundles/music/css/music.css') }}">{% endblock %}
+
+{% block content %}
+<section class="music music-videos">
+    <header class="music-head">
+        <p class="music-eyebrow">{{ '@music.videos.eyebrow'|trans }}</p>
+        <h1>{{ '@music.videos.title'|trans }}</h1>
+        <p class="music-lead">{{ '@music.videos.lead'|trans }}</p>
+    </header>
+    {% if videos|length %}
+    <div class="music-video-grid">{% for video in videos %}{% include '@Music/client/_video_card.html.twig' %}{% endfor %}</div>
+    {% else %}
+    <p class="music-empty">{{ '@music.videos.empty'|trans }}</p>
+    {% endif %}
+</section>
+{% endblock %}

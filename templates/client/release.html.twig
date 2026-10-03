@@ -1,0 +1,63 @@
+{#
+ # One record: its sleeve and its title, the label first ("released by",
+ # "buy it at the label"), then the player - "listen in full" on the
+ # platforms, the tracks with their excerpts and waveforms - who plays, the
+ # prizes, the liner notes, the other platforms, the films, and the
+ # schema.org MusicAlbum for the search engines.
+ #}
+{% extends 'layout1.html.twig' %}
+
+{% block title %}{{ release.title }}{% endblock %}
+{% block description %}{{ release.excerpt ?? release.headline ?? ('@music.release.description'|trans({title: release.title, label: release.label ? release.label.name : ''})) }}{% endblock %}
+{% block type %}music.album{% endblock %}
+
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('bundles/music/css/music.css') }}">{% endblock %}
+{% block javascripts %}{{ parent() }}<script src="{{ asset('bundles/music/js/player.js') }}" defer></script>
+{% if jsonld %}<script type="application/ld+json">{{ jsonld|json_encode(constant('JSON_UNESCAPED_SLASHES') b-or constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_HEX_TAG'))|raw }}</script>{% endif %}
+{% endblock %}
+
+{% block content %}
+<article class="music music-release">
+    <header class="music-release-head">
+        <figure class="music-release-cover">
+            {% if release.artwork %}<img src="{{ release.artwork }}" alt="{{ '@music.release.cover_of'|trans({title: release.title}) }}">{% endif %}
+        </figure>
+        <div>
+            <p class="music-eyebrow">{{ ('@music.release.type.' ~ release.type.value)|trans }}{{ release.releasedAt ? ' · ' ~ release.releasedAt|format_date('long') }}</p>
+            <h1>{{ release.title }}</h1>
+            {% if release.headline %}<p class="music-lead">{{ release.headline }}</p>{% endif %}
+            {% set performers_line = music_performers(release) %}
+            {% if performers_line %}<p class="music-performers">{{ '@music.release.with'|trans({performers: performers_line}) }}</p>{% endif %}
+
+            {% include '@Music/client/_label.html.twig' with {release: release} only %}
+
+            {% if not release.out %}
+            <p class="music-upcoming">{{ release.releasedAt ? '@music.release.out_on'|trans({date: release.releasedAt|format_date('long')}) : '@music.release.upcoming'|trans }}
+                {% if release.presaveUrl %} <a class="music-button" href="{{ release.presaveUrl }}" rel="noopener" target="_blank">{{ '@music.release.presave'|trans }}</a>{% endif %}
+            </p>
+            {% endif %}
+        </div>
+    </header>
+
+    {{ music_player(release) }}
+
+    {% if release.awardList|length %}
+    <h2>{{ '@music.release.awards'|trans }}</h2>
+    <ul class="music-awards">
+        {% for award in release.awardList %}<li><span>{{ award.title }}{% if award.by %} <small>— {{ award.by }}</small>{% endif %}</span></li>{% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if release.content %}
+    <h2>{{ '@music.release.notes'|trans }}</h2>
+    <div class="music-prose">{{ release.content|wysiwyg|raw }}</div>
+    {% endif %}
+
+    {% include '@Music/client/_links.html.twig' with {release: release, show_label: false} only %}
+
+    {% if videos|length %}
+    <h2>{{ '@music.videos.title'|trans }}</h2>
+    <div class="music-video-grid">{% for video in videos %}{% include '@Music/client/_video_card.html.twig' %}{% endfor %}</div>
+    {% endif %}
+</article>
+{% endblock %}

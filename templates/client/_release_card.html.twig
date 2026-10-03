@@ -1,0 +1,16 @@
+{# A release on a list: its sleeve, its title, its label and year, "listen". #}
+<article class="music-card">
+    <a class="music-card-cover" href="{{ path('music_release', {slug: release.slug}) }}">
+        {% if release.artwork %}<img src="{{ release.artwork }}" alt="{{ '@music.release.cover_of'|trans({title: release.title}) }}" loading="lazy">{% endif %}
+    </a>
+    <div class="music-card-body">
+        {% if not release.out %}<span class="music-badge">{{ '@music.release.upcoming'|trans }}</span>{% endif %}
+        <h3><a href="{{ path('music_release', {slug: release.slug}) }}">{{ release.title }}</a></h3>
+        <p class="music-card-meta">
+            {%- if release.label %}{{ release.label.name }}{% endif %}
+            {%- if release.label and release.releasedAt %} · {% endif %}
+            {%- if release.releasedAt %}{{ release.releasedAt|date('Y') }}{% endif -%}
+        </p>
+        <a class="music-more" href="{{ path('music_release', {slug: release.slug}) }}">{{ '@music.index.listen'|trans }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+    </div>
+</article>

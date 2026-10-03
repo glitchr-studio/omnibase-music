@@ -1,0 +1,10 @@
+{# A film on a list: its poster, its length, its title, where it was played. #}
+<a class="music-video-card" href="{{ path('music_video', {slug: video.slug}) }}">
+    <span class="music-poster">
+        {% if video.poster %}<img src="{{ video.poster }}" alt="" loading="lazy">{% endif %}
+        <span class="music-poster-play" aria-hidden="true"><i class="fa-solid fa-play"></i></span>
+        {% if video.duration %}<span class="music-poster-duration">{{ video.duration|music_duration }}</span>{% endif %}
+    </span>
+    <h3>{{ video.title }}</h3>
+    {% if video.venue or video.recordedAt %}<span class="music-card-meta">{{ video.venue }}{{ video.venue and video.recordedAt ? ' · ' }}{{ video.recordedAt ? video.recordedAt|format_date('medium') }}</span>{% endif %}
+</a>

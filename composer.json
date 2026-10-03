@@ -1,0 +1,45 @@
+{
+    "name": "omnibase/music",
+    "description": "A musician's site on omnibase: discography with the label in front, repertoire, videos, instrument, performers, and a dependency-free player - the listening links through glitchr/omnisong.",
+    "type": "symfony-bundle",
+    "license": "LGPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Marco Meyer",
+            "email": "marco.meyer@glitchr.io"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "doctrine/orm": "^2.15|^3.0",
+        "glitchr/omnibase": "3.0.*-dev",
+        "omnibase/admin": "dev-main",
+        "symfony/config": "^6.0|^7.0|^8.0",
+        "symfony/dependency-injection": "^6.0|^7.0|^8.0",
+        "symfony/form": "^6.0|^7.0|^8.0",
+        "symfony/http-kernel": "^6.0|^7.0|^8.0",
+        "symfony/security-bundle": "^6.0|^7.0|^8.0",
+        "glitchr/omnisong": "1.x-dev",
+        "symfony/process": "^6.0|^7.0|^8.0",
+        "symfony/twig-bundle": "^6.0|^7.0|^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Base\\Music\\": "./src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Base\\Music\\Tests\\": "./tests"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require-dev": {
+        "phpunit/phpunit": "^11.0",
+        "symfony/validator": "^6.0|^7.0|^8.0"
+    },
+    "suggest": {
+        "ffmpeg": "The ffmpeg binary on the server computes the tracks' waveforms (bin/console music:peaks)."
+    }
+}

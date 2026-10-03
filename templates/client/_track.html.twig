@@ -1,0 +1,32 @@
+{#
+ # One track: its play button (what it plays from: music_source() - the
+ # site's excerpt, a catalogue's preview, or the release's embed), its
+ # place, its title, its waveform, its length. `single` renders the button
+ # and the title alone (music_player(track)).
+ #}
+{% set source = music_source(track) %}
+{% set label = track.displayTitle %}
+{% set button %}
+<button type="button" class="music-track-play"
+    {%- if source %} data-music-track data-src="{{ source.src }}" data-kind="{{ source.kind }}"{% else %} disabled{% endif %}
+    data-title="{{ label }}" data-release="{{ release ? release.slug }}" data-release-title="{{ release ? release.title }}"
+    {%- if track.peaks %} data-peaks="{{ track.peaks|json_encode }}"{% endif %}
+    aria-pressed="false" aria-label="{{ (source and source.kind == 'embed' ? '@music.player.open_embed' : '@music.player.play_track')|trans({title: label}) }}">
+    <i class="fa-solid {{ source and source.kind == 'embed' ? 'fa-up-right-from-square' : 'fa-play' }} music-icon-play" aria-hidden="true"></i><i class="fa-solid fa-pause music-icon-pause" aria-hidden="true"></i>
+</button>
+{% endset %}
+{% if single|default(false) %}
+<span class="music-track is-single" data-music-row>{{ button }}<span class="music-track-title">{{ label }}</span></span>
+{% else %}
+<li class="music-track{{ waves ? ' has-wave' }}" data-music-row>
+    {{ button }}
+    <span class="music-track-no">{{ track.position }}</span>
+    <span class="music-track-title">{{ label }}
+        {%- if track.title and track.work %}<small>{{ track.work.composer }}{{ track.movement ? ' · ' ~ track.movement }}</small>{% endif %}
+        {%- if track.performers %}<small>{{ track.performers }}</small>{% endif %}
+        {%- if source and source.kind == 'preview' %}<small>{{ '@music.player.preview'|trans }}</small>{% endif %}
+    </span>
+    {% if waves %}<canvas class="music-wave" data-peaks="{{ (track.peaks ?? [])|json_encode }}" aria-hidden="true"></canvas>{% endif %}
+    <span class="music-track-time">{{ track.duration|music_duration }}</span>
+</li>
+{% endif %}

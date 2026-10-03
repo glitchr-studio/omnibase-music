@@ -1,0 +1,29 @@
+{# The music tile (Base\Music\Admin\Widget\LatestReleaseWidgetType): the last record out, the next one announced, the tracks with nothing to play. #}
+{% set crud = 'Base\\Music\\Controller\\Admin\\Crud\\ReleaseCrudController' %}
+<div class="analytics-card card music-widget">
+    <div class="analytics-card-header">
+        <h2 class="analytics-card-title">{{ widget.label|trans({}, 'admin') }}</h2>
+    </div>
+    <div class="music-widget-body">
+        {% for item in [{release: latest, label: '@music.admin.widget.latest'}, {release: upcoming, label: '@music.admin.widget.upcoming'}] %}
+            {% if item.release %}
+            <a class="music-widget-release" href="{{ admin_url(crud, 'detail', item.release.id) }}">
+                {% if item.release.artwork %}<img src="{{ item.release.artwork }}" alt="">{% else %}<span class="music-widget-nocover"><i class="fa-solid fa-record-vinyl"></i></span>{% endif %}
+                <span><small>{{ item.label|trans }}</small><b>{{ item.release.title }}</b><small>{{ item.release.label ? item.release.label.name }}{{ item.release.releasedAt ? ' · ' ~ item.release.releasedAt|format_date('medium') }}</small></span>
+            </a>
+            {% endif %}
+        {% endfor %}
+        {% if not latest and not upcoming %}<p class="music-widget-empty">{{ '@music.admin.widget.none'|trans }}</p>{% endif %}
+        <p class="music-widget-silent{{ silent > 0 ? ' is-warning' }}"><strong>{{ silent }}</strong> {{ '@music.admin.widget.silent'|trans({count: silent}) }}</p>
+    </div>
+</div>
+<style>
+    .music-widget-body { display: grid; gap: .6rem; padding: 0 1rem 1rem; }
+    .music-widget-release { display: grid; grid-template-columns: 3.2rem 1fr; gap: .7rem; align-items: center; color: inherit; text-decoration: none; }
+    .music-widget-release img, .music-widget-nocover { width: 3.2rem; height: 3.2rem; border-radius: .4rem; object-fit: cover; display: grid; place-items: center; background: rgba(127,127,127,.12); }
+    .music-widget-release span { display: grid; line-height: 1.25; }
+    .music-widget-release small { font-size: .75rem; opacity: .7; }
+    .music-widget-silent { margin: 0; padding: .6rem .8rem; border-radius: .6rem; background: rgba(127,127,127,.08); font-size: .85rem; }
+    .music-widget-silent.is-warning { background: rgba(252,104,117,.16); }
+    .music-widget-empty { margin: 0; font-size: .85rem; opacity: .7; }
+</style>

@@ -1,0 +1,27 @@
+{#
+ # The bar at the bottom of every page (music_player_bar(), once, in the
+ # host's layout): what plays, play/pause, the neighbouring tracks, the
+ # progress on the waveform, the time, "listen in full", the sound, and a
+ # cross that stops the music and puts the bar away. Hidden
+ # until something plays; public/js/player.js drives it (and is loaded here,
+ # so the host has nothing else to add).
+ #}
+<div id="music-player" class="music-player" hidden role="region" aria-label="{{ '@music.player.bar'|trans }}" data-music-waves="{{ not waves ? 'off' : (live_waves ? 'live' : 'static') }}">
+    <div class="music-player-controls">
+        <button type="button" data-music-prev aria-label="{{ '@music.player.prev'|trans }}"><i class="fa-solid fa-backward-step" aria-hidden="true"></i></button>
+        <button type="button" data-music-toggle aria-pressed="false" aria-label="{{ '@music.player.play'|trans }}" data-label-play="{{ '@music.player.play'|trans }}" data-label-pause="{{ '@music.player.pause'|trans }}"><i class="fa-solid fa-play music-icon-play" aria-hidden="true"></i><i class="fa-solid fa-pause music-icon-pause" aria-hidden="true"></i></button>
+        <button type="button" data-music-next aria-label="{{ '@music.player.next'|trans }}"><i class="fa-solid fa-forward-step" aria-hidden="true"></i></button>
+    </div>
+    <div class="music-player-info" aria-live="polite"><span data-music-title></span><span data-music-release-title></span></div>
+    <div class="music-player-progress">
+        {% if waves %}<canvas class="music-wave" aria-hidden="true"></canvas>{% else %}<canvas class="music-wave" data-flat aria-hidden="true"></canvas>{% endif %}
+        <input type="range" data-music-seek min="0" max="1000" step="1" value="0" aria-label="{{ '@music.player.seek'|trans }}">
+    </div>
+    <span class="music-player-time"><span data-music-time>0:00</span> / <span data-music-duration>0:00</span></span>
+    <div class="music-player-end">
+        <button type="button" data-music-full-open hidden title="{{ '@music.full.note'|trans }}">{{ '@music.full.open'|trans }}</button>
+        <button type="button" data-music-mute aria-pressed="false" aria-label="{{ '@music.player.mute'|trans }}"><i class="fa-solid fa-volume-high music-icon-sound" aria-hidden="true"></i><i class="fa-solid fa-volume-xmark music-icon-muted" aria-hidden="true"></i></button>
+        <button type="button" class="music-player-close" data-music-close aria-label="{{ '@music.player.close'|trans }}" title="{{ '@music.player.close'|trans }}"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+</div>
+<script src="{{ asset('bundles/music/js/player.js') }}" defer></script>

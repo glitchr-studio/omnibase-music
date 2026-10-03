@@ -1,0 +1,14 @@
+{#
+ # One platform's iframe behind a button (music_embed(), music_listen_embed(),
+ # music_playlist_embed()): the <template> is turned into the iframe on the
+ # click, nothing is asked of the platform before.
+ #}
+<div class="music-embed" data-music-embed data-release="{{ release is defined and release ? release.slug }}">
+    <template>{{ embed.html|raw }}</template>
+    <button type="button" class="music-embed-play" data-music-embed-play>
+        <i class="fa-solid fa-circle-play" aria-hidden="true"></i>
+        <span>{{ '@music.embed.play'|trans({platform: embed.platform.label}) }}
+            <span class="music-embed-note">{{ '@music.embed.note'|trans({platform: embed.platform.label}) }}</span>
+        </span>
+    </button>
+</div>

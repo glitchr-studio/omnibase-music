@@ -1,0 +1,80 @@
+{#
+ # The discography: the featured record first and larger - its sleeve, its
+ # label, "listen" - the ones announced, the others, then "listen in full"
+ # (the musician's profile and playlists on the platforms) and the films.
+ # The host's layout1.html.twig gives the chrome; music.css the look.
+ #}
+{% extends 'layout1.html.twig' %}
+
+{% block title %}{{ '@music.index.title'|trans }}{% endblock %}
+{% block description %}{{ '@music.index.description'|trans }}{% endblock %}
+
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('bundles/music/css/music.css') }}">{% endblock %}
+{% block javascripts %}{{ parent() }}<script src="{{ asset('bundles/music/js/player.js') }}" defer></script>{% endblock %}
+
+{% block content %}
+<section class="music music-index">
+    <header class="music-head">
+        <p class="music-eyebrow">{{ '@music.index.eyebrow'|trans }}</p>
+        <h1>{{ '@music.index.title'|trans }}</h1>
+        <p class="music-lead">{{ '@music.index.lead'|trans }}</p>
+    </header>
+
+    {% if featured %}
+    <article class="music-featured">
+        <a class="music-card-cover" href="{{ path('music_release', {slug: featured.slug}) }}">
+            {% if featured.artwork %}<img src="{{ featured.artwork }}" alt="{{ '@music.release.cover_of'|trans({title: featured.title}) }}">{% endif %}
+        </a>
+        <div>
+            <p class="music-eyebrow">{{ ('@music.release.type.' ~ featured.type.value)|trans }}{{ featured.releasedAt ? ' · ' ~ featured.releasedAt|date('Y') }}</p>
+            <h2><a href="{{ path('music_release', {slug: featured.slug}) }}">{{ featured.title }}</a></h2>
+            {% if featured.headline %}<p class="music-lead">{{ featured.headline }}</p>{% endif %}
+            {% set performers_line = music_performers(featured) %}
+            {% if performers_line %}<p class="music-performers">{{ '@music.release.with'|trans({performers: performers_line}) }}</p>{% endif %}
+            {% include '@Music/client/_label.html.twig' with {release: featured} only %}
+            <p><a class="music-button is-ghost" href="{{ path('music_release', {slug: featured.slug}) }}"><i class="fa-solid fa-headphones" aria-hidden="true"></i> {{ '@music.index.listen'|trans }}</a></p>
+        </div>
+    </article>
+    {% endif %}
+
+    {% if upcoming|length %}
+    <h2>{{ '@music.index.upcoming'|trans }}</h2>
+    <div class="music-grid">{% for release in upcoming %}{% include '@Music/client/_release_card.html.twig' %}{% endfor %}</div>
+    {% endif %}
+
+    {% if others|length %}
+    <h2>{{ '@music.index.discography'|trans }}</h2>
+    <div class="music-grid">{% for release in others %}{% include '@Music/client/_release_card.html.twig' %}{% endfor %}</div>
+    {% elseif not featured and not upcoming|length %}
+    <p class="music-empty">{{ '@music.index.empty'|trans }}</p>
+    {% endif %}
+
+    {% if artist or own|length or recommended|length %}
+    <section class="music-listen">
+        <h2>{{ '@music.playlist.title'|trans }}</h2>
+        <p class="music-lead">{{ '@music.full.note'|trans }}</p>
+        {% if artist %}{{ music_playlist_embed(artist) }}{% endif %}
+        {% for group in [own, recommended] %}
+            {% if group|length %}
+            <h3>{{ ('@music.playlist.kind.' ~ (loop.first ? 'own' : 'recommended'))|trans }}</h3>
+            <div class="music-playlists">
+                {% for playlist in group %}
+                <article class="music-playlist">
+                    <h3>{{ playlist.title }}</h3>
+                    {% if playlist.description %}<p>{{ playlist.description }}</p>{% endif %}
+                    {{ music_playlist_embed(playlist) }}
+                </article>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endfor %}
+    </section>
+    {% endif %}
+
+    {% if videos|length %}
+    <h2>{{ '@music.videos.title'|trans }}</h2>
+    <div class="music-video-grid">{% for video in videos %}{% include '@Music/client/_video_card.html.twig' %}{% endfor %}</div>
+    <p><a class="music-more" href="{{ path('music_videos') }}">{{ '@music.videos.all'|trans }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a></p>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,37 @@
+{#
+ # The film of the home page (music_hero_video()): muted, looping, playing
+ # by itself, with a button to hear it; its poster alone for a visitor who
+ # asks for less motion (music.css, and player.js pauses it). The settings
+ # music.hero.video and music.hero.poster say which.
+ #}
+{# A setting holds an uploaded path (made public through omnibase's |public) or an address. #}
+{% set src = video ? (video starts with 'http' or video starts with '/' ? video : video|public) : null %}
+{% set poster_src = poster ? (poster starts with 'http' or poster starts with '/' ? poster : poster|public) : null %}
+{# The frame an administrator chose on the page (music.hero.position, music.hero.zoom), over the host's own. #}
+{% set frame_style = position ? 'object-position: ' ~ position ~ '; transform: scale(' ~ zoom ~ '); transform-origin: ' ~ position ~ '; animation: none;' : '' %}
+<div class="music-hero{{ src ? ' has-video' }} {{ attributes.class|default('') }}">
+    {% if src %}
+    <video autoplay muted loop playsinline preload="metadata"{% if frame_style %} style="{{ frame_style }}"{% endif %} data-music-hero-media{% if poster_src %} poster="{{ poster_src }}"{% endif %} aria-hidden="true">
+        <source src="{{ src }}">
+    </video>
+    <button type="button" class="music-hero-sound" data-music-hero-sound aria-pressed="false" aria-label="{{ '@music.hero.sound_on'|trans }}" data-label-on="{{ '@music.hero.sound_on'|trans }}" data-label-off="{{ '@music.hero.sound_off'|trans }}">
+        <i class="fa-solid fa-volume-xmark music-icon-muted" aria-hidden="true"></i><i class="fa-solid fa-volume-high music-icon-sound" aria-hidden="true"></i>
+    </button>
+    {% endif %}
+    {% if poster_src %}<img class="music-hero-poster" src="{{ poster_src }}" alt=""{% if frame_style %} style="{{ frame_style }}"{% endif %} data-music-hero-media>{% endif %}
+</div>
+{% if is_granted('ROLE_ADMIN') %}
+{# For an administrator: reframe the picture here - drag it, zoom, save - or change it in the settings. #}
+<div class="music-hero-frame" data-music-hero-frame data-url="{{ path('music_hero_frame') }}" data-token="{{ csrf_token('music-hero-frame') }}" data-position="{{ position }}" data-zoom="{{ zoom }}">
+    <button type="button" class="music-hero-frame-toggle" data-frame-action="edit"><i class="fa-solid fa-crop-simple" aria-hidden="true"></i> {{ '@music.hero.frame.edit'|trans }}</button>
+    <div class="music-hero-frame-tools" hidden>
+        <p class="music-hero-frame-help">{{ '@music.hero.frame.help'|trans }}</p>
+        <label>{{ '@music.hero.frame.zoom'|trans }} <input type="range" min="1" max="2.5" step="0.01" value="{{ zoom }}" data-frame-zoom></label>
+        <button type="button" data-frame-action="save" class="is-primary">{{ '@music.hero.frame.save'|trans }}</button>
+        <button type="button" data-frame-action="reset">{{ '@music.hero.frame.reset'|trans }}</button>
+        <button type="button" data-frame-action="cancel">{{ '@music.hero.frame.cancel'|trans }}</button>
+        {% if app.request is not null and app.request.attributes.get('_route') != 'admin_settings' %}<a href="{{ path('admin_settings') }}">{{ '@music.hero.frame.change'|trans }}</a>{% endif %}
+    </div>
+</div>
+<script src="{{ asset('bundles/music/js/hero-frame.js') }}" defer></script>
+{% endif %}

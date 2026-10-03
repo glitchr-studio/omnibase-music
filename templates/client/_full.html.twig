@@ -1,0 +1,17 @@
+{#
+ # "Listen in full on Spotify / Apple Music / Deezer": the platform's own
+ # player of the whole release, made on the click (one <template> each, so
+ # nothing loads from the platform before). A listener logged in there
+ # streams it, and the stream counts for the musician; a preview does not.
+ #}
+<div class="music-full" data-music-full data-release="{{ release.slug }}">
+    <p class="music-full-title">{{ '@music.full.title'|trans }}</p>
+    <div class="music-full-choices">
+        {% for embed in embeds %}
+        <button type="button" data-music-full-play data-platform="{{ embed.platform.value }}" aria-pressed="false"><i class="fa-solid fa-play" aria-hidden="true"></i> {{ embed.platform.label }}</button>
+        <template data-platform="{{ embed.platform.value }}">{{ embed.html|raw }}</template>
+        {% endfor %}
+    </div>
+    <div class="music-full-frame" data-music-full-frame hidden></div>
+    <p class="music-full-note">{{ '@music.full.note'|trans }}</p>
+</div>

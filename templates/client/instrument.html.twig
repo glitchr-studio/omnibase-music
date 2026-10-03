@@ -1,0 +1,38 @@
+{# The instrument: its picture, its maker, its year and place, its model, whose hands it went through, who lends it. #}
+{% extends 'layout1.html.twig' %}
+
+{% block title %}{{ instrument.name }}{% endblock %}
+{% block description %}{{ '@music.instrument.description'|trans({name: instrument.name, origin: instrument.origin}) }}{% endblock %}
+
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('bundles/music/css/music.css') }}">{% endblock %}
+
+{% block content %}
+<section class="music music-instrument-page">
+    <div class="music-instrument">
+        {% if instrument.image %}<figure><img src="{{ instrument.image }}" alt="{{ instrument.name }}"></figure>{% endif %}
+        <div>
+            <p class="music-eyebrow">{{ '@music.instrument.eyebrow'|trans }}</p>
+            <h1>{{ instrument.name }}</h1>
+            {% if instrument.kind or instrument.origin %}<p class="music-lead">{{ [instrument.kind, instrument.origin]|filter(v => v)|join(', ') }}</p>{% endif %}
+            <dl>
+                {% if instrument.maker %}<dt>{{ '@music.instrument.maker'|trans }}</dt><dd>{{ instrument.maker }}</dd>{% endif %}
+                {% if instrument.origin %}<dt>{{ '@music.instrument.origin'|trans }}</dt><dd>{{ instrument.origin }}</dd>{% endif %}
+                {% if instrument.model %}<dt>{{ '@music.instrument.model'|trans }}</dt><dd>{{ instrument.model }}</dd>{% endif %}
+                {% if instrument.provenance %}<dt>{{ '@music.instrument.provenance'|trans }}</dt><dd>{{ instrument.provenance|nl2br }}</dd>{% endif %}
+                {% if instrument.loan %}<dt>{{ '@music.instrument.loan'|trans }}</dt><dd>{{ instrument.loan }}</dd>{% endif %}
+            </dl>
+            {% if instrument.description %}<div class="music-prose">{{ instrument.description|nl2br }}</div>{% endif %}
+        </div>
+    </div>
+    {% for other in others %}
+    <div class="music-instrument" style="margin-top: 3rem">
+        {% if other.image %}<figure><img src="{{ other.image }}" alt="{{ other.name }}" loading="lazy"></figure>{% endif %}
+        <div>
+            <h2>{{ other.name }}</h2>
+            <p class="music-lead">{{ [other.kind, other.maker, other.origin]|filter(v => v)|join(', ') }}</p>
+            {% if other.description %}<div class="music-prose">{{ other.description|nl2br }}</div>{% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</section>
+{% endblock %}

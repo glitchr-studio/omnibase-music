@@ -1,0 +1,21 @@
+{#
+ # The label, before anything else: its logo, "released by" over the
+ # label's name and the catalogue number, then its two actions on the same
+ # row - "buy it at the label" (the record's page there, or the label's
+ # shop) and the label's site - each an icon and a line, the same size.
+ #}
+{% set label = release.label %}
+{% set at_label = release.labelLink %}
+{% if label or at_label %}
+<div class="music-label">
+    {% if label and label.logo %}<img class="music-label-logo" src="{{ label.logo }}" alt="{{ label.name }}" loading="lazy">{% endif %}
+    <p class="music-label-by">
+        {% if label %}<span>{{ '@music.label.released_by'|trans }}</span> <strong>{{ label.name }}</strong>{% endif %}
+        {% if release.catalogue %}<span class="music-label-catalogue">{{ release.catalogue }}</span>{% endif %}
+    </p>
+    <div class="music-label-actions">
+        {% if at_label %}<a class="music-button" href="{{ at_label.url }}" rel="noopener" target="_blank"><i class="fa-solid fa-bag-shopping" aria-hidden="true"></i><span>{{ '@music.label.buy'|trans({label: label ? label.name : at_label.title()}) }}</span></a>{% endif %}
+        {% if label and label.url and (not at_label or at_label.url != label.url) %}<a class="music-button is-ghost" href="{{ label.url }}" rel="noopener" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i><span>{{ '@music.label.visit'|trans({label: label.name}) }}</span></a>{% endif %}
+    </div>
+</div>
+{% endif %}

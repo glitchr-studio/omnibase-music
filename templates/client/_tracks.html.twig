@@ -1,0 +1,11 @@
+{# The track list of a release, disc by disc (the disc named only when there are several), and its total length. #}
+{% set discs = release.discs %}
+<div class="music-tracks">
+    {% for disc, tracks in discs %}
+        {% if discs|length > 1 %}<h3 class="music-disc">{{ '@music.release.disc'|trans({number: disc}) }}</h3>{% endif %}
+        <ol class="music-track-list">
+            {% for track in tracks %}{% include '@Music/client/_track.html.twig' with {track: track, release: release, waves: waves} only %}{% endfor %}
+        </ol>
+    {% endfor %}
+    {% if release.duration %}<p class="music-total">{{ '@music.release.total'|trans({duration: release.duration|music_duration}) }}</p>{% endif %}
+</div>
