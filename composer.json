@@ -2,7 +2,7 @@
     "name": "omnibase/music",
     "description": "A musician's site on omnibase: discography with the label in front, repertoire, videos, instrument, performers, and a dependency-free player - the listening links through glitchr/omnisong.",
     "type": "symfony-bundle",
-    "license": "LGPL-3.0-or-later",
+    "license": "MIT",
     "authors": [
         {
             "name": "Marco Meyer",
