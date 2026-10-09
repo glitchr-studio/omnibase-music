@@ -14,7 +14,7 @@
     </div>
     <div class="music-player-info" aria-live="polite"><span data-music-title></span><span data-music-release-title></span></div>
     <div class="music-player-progress">
-        {% if waves %}<canvas class="music-wave" aria-hidden="true"></canvas>{% else %}<canvas class="music-wave" data-flat aria-hidden="true"></canvas>{% endif %}
+        {% if waves %}<canvas id="music-player-wave" class="music-wave" aria-hidden="true"></canvas>{% else %}<canvas id="music-player-wave" class="music-wave" data-flat aria-hidden="true"></canvas>{% endif %}
         <input type="range" data-music-seek min="0" max="1000" step="1" value="0" aria-label="{{ '@music.player.seek'|trans }}">
     </div>
     <span class="music-player-time"><span data-music-time>0:00</span> / <span data-music-duration>0:00</span></span>

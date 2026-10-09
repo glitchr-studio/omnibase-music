@@ -149,10 +149,20 @@ class Release extends Thread implements LinkableInterface
     public function getCoverUrl(): ?string { return $this->coverUrl; }
     public function setCoverUrl(?string $coverUrl): self { $this->coverUrl = $coverUrl ?: null; return $this; }
 
-    /** The sleeve to show: the upload, else the catalogue's. */
+    /**
+     * The sleeve to show, by its address: the upload's on the site ("/uploads/..."), else the
+     * catalogue's. The upload's own path is the file's on disk (/srv/app/public/uploads/...): the
+     * pages printed it as an image's src, and no browser could load it.
+     */
     public function getArtwork(): ?string
     {
-        return ($this->hasCover() ? $this->getCover() : null) ?? $this->coverUrl;
+        if ($this->hasCover() && null !== ($path = $this->getCover()) && '' !== $path) {
+            $public = strpos($path, '/public/');
+
+            return false !== $public ? substr($path, $public + \strlen('/public')) : $path;
+        }
+
+        return $this->coverUrl;
     }
 
     /** @return array<string, string> platform value => URL, as typed in the back office */

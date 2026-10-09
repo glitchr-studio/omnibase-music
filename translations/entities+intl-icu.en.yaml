@@ -1,0 +1,26 @@
+# The names of omnibase/music's entities, which omnibase/admin titles its screens with (en).
+music:
+  release:
+    _singular: "release"
+    _plural: "discography"
+  track:
+    _singular: "track"
+    _plural: "tracks"
+  label:
+    _singular: "label"
+    _plural: "labels"
+  playlist:
+    _singular: "playlist"
+    _plural: "playlists"
+  video:
+    _singular: "video"
+    _plural: "videos"
+  work:
+    _singular: "work"
+    _plural: "repertoire"
+  performer:
+    _singular: "performer"
+    _plural: "performers"
+  instrument:
+    _singular: "instrument"
+    _plural: "instruments"

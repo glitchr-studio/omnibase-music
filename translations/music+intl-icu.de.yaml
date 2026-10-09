@@ -140,6 +140,17 @@ instrument:
   loan: "Leihgabe von"
 
 admin:
+  # The back office's menu and dashboard, for a site's DashboardController: '@music.admin.menu.releases'...
+  menu:
+    section: "Musik"
+    releases: "Diskografie"
+    labels: "Labels"
+    playlists: "Playlists"
+    videos: "Videos"
+    works: "Repertoire"
+    performers: "Mitwirkende"
+    instruments: "Instrumente"
+    latest: "Diskografie"
   release:
     title: "Titel"
     type: "Art"

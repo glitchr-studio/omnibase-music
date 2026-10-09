@@ -26,7 +26,7 @@
         {%- if track.performers %}<small>{{ track.performers }}</small>{% endif %}
         {%- if source and source.kind == 'preview' %}<small>{{ '@music.player.preview'|trans }}</small>{% endif %}
     </span>
-    {% if waves %}<canvas class="music-wave" data-peaks="{{ (track.peaks ?? [])|json_encode }}" aria-hidden="true"></canvas>{% endif %}
+    {% if waves %}<canvas{% if track.id %} id="music-wave-{{ track.id }}"{% endif %} class="music-wave" data-peaks="{{ (track.peaks ?? [])|json_encode }}" aria-hidden="true"></canvas>{% endif %}
     <span class="music-track-time">{{ track.duration|music_duration }}</span>
 </li>
 {% endif %}
