@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * What a track plays from, in the order music.player.order says: the
- * site's own excerpt (file), a catalogue's 30 s preview (preview), and -
+ * site's own file (file: an excerpt, or the whole track), a catalogue's 30 s preview (preview), and -
  * when there is no audio at all - the iframe of the first platform link
  * Omnisong's Embedder can play (embed), loaded only on a click.
  */
@@ -63,6 +63,51 @@ class Player
         return $embeds;
     }
 
+    /**
+     * "Listen in full" as the player's bar asks for it, platform by platform:
+     * the iframe that plays the whole release there, and the release's own
+     * page on that platform - where a listener likes or saves it ("See the
+     * album"). With no page on the platform: the label's page of the record,
+     * then $fallback (the site's own page of it).
+     *
+     * @return list<array{platform: string, label: string, html: string, src: string, height: int, page: string}>
+     */
+    public function listen(Release $release, ?string $fallback = null): array
+    {
+        $links = $release->getPlatformLinks();
+        $elsewhere = $release->getLabelLink()?->url ?? $fallback ?? '';
+        $sources = [];
+        foreach ($this->full($release) as $embed) {
+            $sources[] = [
+                'platform' => $embed->platform->value,
+                'label' => $embed->platform->label(),
+                'html' => $embed->html,
+                'src' => $embed->src,
+                'height' => $embed->height,
+                'page' => $links->get($embed->platform)?->url ?? $elsewhere,
+            ];
+        }
+
+        return $sources;
+    }
+
+    /** Whether "Listen in full" has a platform to offer for the release, without building its iframes. */
+    public function hasFull(Release $release): bool
+    {
+        if (null === $this->embedder) {
+            return false;
+        }
+        $links = $release->getPlatformLinks();
+        foreach ($this->full as $value) {
+            $platform = Platform::tryFrom((string) $value);
+            if ($platform && $links->has($platform) && $this->embedder->supports($platform)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /** A playlist's (or a profile's) iframe; null when its platform cannot be embedded. */
     public function playlist(Playlist $playlist): ?Embed
     {
@@ -75,19 +120,21 @@ class Player
      * The source of one track for player.js: what it is and where it is.
      * Null when it has nothing to play (no file, no preview, no embed).
      *
-     * @return array{kind: string, src: string}|null
+     * whole: the file is the track from end to end, not an excerpt.
+     *
+     * @return array{kind: string, src: string, whole: bool}|null
      */
     public function source(Track $track): ?array
     {
         foreach ($this->order as $kind) {
             $src = match ($kind) {
-                self::FILE => $track->hasSample() ? $this->safely(fn () => $track->getSample()) : null,
+                self::FILE => $track->hasSample() ? $this->safely(fn () => $track->getSampleUrl()) : null,
                 self::PREVIEW => $track->getPreviewUrl(),
                 self::EMBED => $track->getRelease() ? $this->embed($track->getRelease())?->src : null,
                 default => null,
             };
             if (\is_string($src) && '' !== $src) {
-                return ['kind' => $kind, 'src' => $src];
+                return ['kind' => $kind, 'src' => $src, 'whole' => self::FILE === $kind && $track->isWhole()];
             }
         }
 

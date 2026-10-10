@@ -7,6 +7,7 @@ use Base\Music\Entity\Track;
 use Base\Music\Entity\Work;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
@@ -15,8 +16,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * One track of a release in the back office: its place, its title - or
- * the work and the movement - its length, its ISRC, the site's excerpt
- * (an upload) and a catalogue's preview. The waveform is not typed: it is
+ * the work and the movement - its length, its ISRC, the site's file (an
+ * upload: an excerpt, or the whole track) and a catalogue's preview, and
+ * how many times it was played. The waveform is not typed: it is
  * computed (the "Waveforms" action, or `music:peaks`).
  *
  * The texts name their domain (@music.…): base-bundle gives every field
@@ -35,8 +37,11 @@ class TrackType extends AbstractType
             ->add('duration', IntegerType::class, ['label' => '@music.admin.track.duration', 'required' => false, 'help' => '@music.admin.track.duration_help', 'attr' => ['min' => 0]])
             ->add('isrc', TextType::class, ['label' => '@music.admin.track.isrc', 'required' => false, 'attr' => ['maxlength' => 15]])
             ->add('sample', AudioType::class, ['label' => '@music.admin.track.sample', 'required' => false, 'multiple' => false, 'class' => Track::class, 'data_mapping' => 'sample', 'help' => '@music.admin.track.sample_help'])
+            ->add('whole', CheckboxType::class, ['label' => '@music.admin.track.whole', 'required' => false, 'help' => '@music.admin.track.whole_help'])
             ->add('previewUrl', UrlType::class, ['label' => '@music.admin.track.preview_url', 'required' => false, 'default_protocol' => 'https', 'help' => '@music.admin.track.preview_url_help'])
-            ->add('performers', TextType::class, ['label' => '@music.admin.track.performers', 'required' => false]);
+            ->add('performers', TextType::class, ['label' => '@music.admin.track.performers', 'required' => false])
+            // Read, never typed: the player counts them (music_track_play).
+            ->add('plays', IntegerType::class, ['label' => '@music.admin.track.plays', 'disabled' => true, 'required' => false, 'help' => '@music.admin.track.plays_help']);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

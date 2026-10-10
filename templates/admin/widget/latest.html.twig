@@ -14,6 +14,7 @@
             {% endif %}
         {% endfor %}
         {% if not latest and not upcoming %}<p class="music-widget-empty">{{ '@music.admin.widget.none'|trans }}</p>{% endif %}
+        <p class="music-widget-silent"><strong>{{ plays }}</strong> {{ '@music.admin.widget.plays'|trans({count: plays}) }}</p>
         <p class="music-widget-silent{{ silent > 0 ? ' is-warning' }}"><strong>{{ silent }}</strong> {{ '@music.admin.widget.silent'|trans({count: silent}) }}</p>
     </div>
 </div>

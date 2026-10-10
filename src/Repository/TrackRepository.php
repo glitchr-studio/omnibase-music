@@ -23,10 +23,25 @@ class TrackRepository extends ServiceEntityRepository
             ->getQuery()->getSingleScalarResult();
     }
 
+    /** One more play of a track: added in the database itself, so two listeners at once are two plays. */
+    public function countPlay(Track $track): void
+    {
+        $this->getEntityManager()
+            ->createQuery('UPDATE '.Track::class.' t SET t.plays = t.plays + 1 WHERE t.id = :id')
+            ->setParameter('id', $track->getId())
+            ->execute();
+    }
+
+    /** The plays of every track together. */
+    public function countPlays(): int
+    {
+        return (int) $this->createQueryBuilder('t')->select('COALESCE(SUM(t.plays), 0)')->getQuery()->getSingleScalarResult();
+    }
+
     /** @return list<Track> those with an excerpt of the site's - all of them, or only the ones whose waveform is missing */
     public function findWithSample(bool $onlyWithoutPeaks = false): array
     {
-        $query = $this->createQueryBuilder('t')->andWhere('t.sample IS NOT NULL')->orderBy('t.id', 'ASC');
+        $query = $this->createQueryBuilder('t')->andWhere('t.sample IS NOT NULL OR t.previewUrl IS NOT NULL')->orderBy('t.id', 'ASC');
         if ($onlyWithoutPeaks) {
             $query->andWhere('t.peaks IS NULL');
         }

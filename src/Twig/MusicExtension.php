@@ -67,6 +67,7 @@ final class MusicExtension extends AbstractExtension
             new TwigFunction('music_performers', self::performers(...)),
             new TwigFunction('music_platform_icon', self::platformIcon(...)),
             new TwigFunction('music_source', $this->player->source(...)),
+            new TwigFunction('music_has_full', $this->hasFull(...)),
         ];
     }
 
@@ -192,6 +193,20 @@ final class MusicExtension extends AbstractExtension
             'position' => $position && preg_match(HeroFrame::POSITION, $position) ? $position : null,
             'zoom' => $zoom >= 1 && $zoom <= HeroFrame::MAX_ZOOM ? $zoom : 1.0,
         ]);
+    }
+
+    /** @var \WeakMap<Release, bool> */
+    private ?\WeakMap $full = null;
+
+    /** Whether "Listen in full" has a platform for the release (asked once per record, whatever its tracks). */
+    private function hasFull(?Release $release): bool
+    {
+        if (null === $release) {
+            return false;
+        }
+        $this->full ??= new \WeakMap();
+
+        return $this->full[$release] ??= $this->player->hasFull($release);
     }
 
     private function hasAudio(Release $release): bool

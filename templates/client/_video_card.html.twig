@@ -1,10 +1,23 @@
-{# A film on a list: its poster, its length, its title, where it was played. #}
-<a class="music-video-card" href="{{ path('music_video', {slug: video.slug}) }}">
-    <span class="music-poster">
+{#
+ # A film on a list: its poster, its length, its title, where it was played.
+ # It plays where it is ([data-music-film], player.js): a click on the poster
+ # puts the film in its place, with its sound - and the music stops; under
+ # the mouse it plays silently first, a film of the site's always, a
+ # platform's only once the visitor has chosen to play one from it (nothing
+ # loads from a platform before a click). The title leads to the film's page.
+ #}
+{% set src = video.local ? video.file : video.embedUrl(false) %}
+<article class="music-video-card">
+    {% if src %}
+    <div class="music-poster" data-music-film data-kind="{{ video.local ? 'file' : (video.youtubeId ? 'youtube' : 'vimeo') }}" data-src="{{ src }}" data-title="{{ video.title }}">
         {% if video.poster %}<img src="{{ video.poster }}" alt="" loading="lazy">{% endif %}
-        <span class="music-poster-play" aria-hidden="true"><i class="fa-solid fa-play"></i></span>
+        <button type="button" class="music-poster-play" data-music-film-play aria-label="{{ '@music.video.play'|trans({title: video.title}) }}"{% if not video.local %} title="{{ (video.youtubeId ? '@music.video.consent_youtube' : '@music.video.consent_vimeo')|trans }}"{% endif %}><i class="fa-solid fa-play" aria-hidden="true"></i></button>
         {% if video.duration %}<span class="music-poster-duration">{{ video.duration|music_duration }}</span>{% endif %}
-    </span>
-    <h3>{{ video.title }}</h3>
+        <button type="button" class="music-poster-close" data-music-film-close aria-label="{{ '@music.video.close'|trans }}" hidden><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    {% else %}
+    <a class="music-poster" href="{{ path('music_video', {slug: video.slug}) }}" tabindex="-1" aria-hidden="true">{% if video.poster %}<img src="{{ video.poster }}" alt="" loading="lazy">{% endif %}</a>
+    {% endif %}
+    <h3><a href="{{ path('music_video', {slug: video.slug}) }}">{{ video.title }}</a></h3>
     {% if video.venue or video.recordedAt %}<span class="music-card-meta">{{ video.venue }}{{ video.venue and video.recordedAt ? ' · ' }}{{ video.recordedAt ? video.recordedAt|format_date('medium') }}</span>{% endif %}
-</a>
+</article>

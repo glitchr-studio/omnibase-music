@@ -3,13 +3,17 @@
  # player of the whole release, made on the click (one <template> each, so
  # nothing loads from the platform before). A listener logged in there
  # streams it, and the stream counts for the musician; a preview does not.
+ # data-page: the record's page on that platform (the bar's "See the
+ # album", where it is liked or saved) - else the label's, else the site's.
  #}
+{% set elsewhere = release.labelLink ? release.labelLink.url : url('music_release', {slug: release.slug}) %}
 <div class="music-full" data-music-full data-release="{{ release.slug }}">
     <p class="music-full-title">{{ '@music.full.title'|trans }}</p>
     <div class="music-full-choices">
         {% for embed in embeds %}
+        {% set link = release.platformLinks.get(embed.platform) %}
         <button type="button" data-music-full-play data-platform="{{ embed.platform.value }}" aria-pressed="false"><i class="fa-solid fa-play" aria-hidden="true"></i> {{ embed.platform.label }}</button>
-        <template data-platform="{{ embed.platform.value }}">{{ embed.html|raw }}</template>
+        <template data-platform="{{ embed.platform.value }}" data-label="{{ embed.platform.label }}" data-page="{{ link ? link.url : elsewhere }}">{{ embed.html|raw }}</template>
         {% endfor %}
     </div>
     <div class="music-full-frame" data-music-full-frame hidden></div>

@@ -1,27 +1,61 @@
 {#
- # The bar at the bottom of every page (music_player_bar(), once, in the
- # host's layout): what plays, play/pause, the neighbouring tracks, the
- # progress on the waveform, the time, "listen in full", the sound, and a
- # cross that stops the music and puts the bar away. Hidden
- # until something plays; public/js/player.js drives it (and is loaded here,
- # so the host has nothing else to add).
+ # The player at the bottom of every page (music_player_bar(), once, in the
+ # host's layout) - a drawer with three rests, pulled from one to the other
+ # under the finger (or clicked):
+ #   put away   only the handle at the bottom ([data-music-mini]); the music goes on;
+ #   the bar    play/pause, the neighbouring tracks, the record's sleeve small
+ #              beside what plays, the progress on the waveform, the time, "listen in full",
+ #              the sound, the cross that puts it away;
+ #   the sheet  above the bar, pulled up: the sleeve large, and the platform's own
+ #              player of the whole record once "listen in full" was asked for -
+ #              the bar then offers "See the album" (its page on that platform).
+ # Hidden until something plays; public/js/player.js drives it (and is loaded
+ # here, so the host has nothing else to add).
  #}
-<div id="music-player" class="music-player" hidden role="region" aria-label="{{ '@music.player.bar'|trans }}" data-music-waves="{{ not waves ? 'off' : (live_waves ? 'live' : 'static') }}">
-    <div class="music-player-controls">
-        <button type="button" data-music-prev aria-label="{{ '@music.player.prev'|trans }}"><i class="fa-solid fa-backward-step" aria-hidden="true"></i></button>
-        <button type="button" data-music-toggle aria-pressed="false" aria-label="{{ '@music.player.play'|trans }}" data-label-play="{{ '@music.player.play'|trans }}" data-label-pause="{{ '@music.player.pause'|trans }}"><i class="fa-solid fa-play music-icon-play" aria-hidden="true"></i><i class="fa-solid fa-pause music-icon-pause" aria-hidden="true"></i></button>
-        <button type="button" data-music-next aria-label="{{ '@music.player.next'|trans }}"><i class="fa-solid fa-forward-step" aria-hidden="true"></i></button>
+<div id="music-player" class="music-player" hidden role="region" aria-label="{{ '@music.player.bar'|trans }}" data-music-waves="{{ not waves ? 'off' : (live_waves ? 'live' : 'static') }}" data-label-on="{{ '@music.full.on'|trans({platform: '%platform%'}) }}" data-consent-label="{{ '@music.consent.label'|trans }}" data-consent-description="{{ '@music.consent.description'|trans }}">
+    {# The drawer's top border is its handle: taken and pulled (a hand under the pointer, the border lit), or clicked to open and fold the sheet. #}
+    <button type="button" class="music-player-grabber" data-music-grab tabindex="-1" aria-hidden="true"></button>
+    <div class="music-sheet-wrap">
+        <div class="music-sheet" id="music-sheet" data-music-drag inert>
+            <button type="button" class="music-sheet-cover" data-music-expand aria-label="{{ '@music.player.collapse'|trans }}" hidden><img data-music-cover alt="" draggable="false"></button>
+            <div class="music-sheet-side">
+                <div class="music-sheet-text"><strong data-music-title></strong><span data-music-release-title></span><em data-music-on hidden></em></div>
+                {# About the record (fetched when the sheet opens): its label, its line, who plays, what it won. #}
+                <div class="music-sheet-about" data-music-about hidden></div>
+                <div class="music-sheet-platforms" data-music-platforms hidden></div>
+                <div class="music-sheet-embed" data-music-full-frame data-music-sheet-embed hidden></div>
+                <p class="music-sheet-note" data-music-full-note hidden>{{ '@music.full.note'|trans }}</p>
+            </div>
+        </div>
     </div>
-    <div class="music-player-info" aria-live="polite"><span data-music-title></span><span data-music-release-title></span></div>
-    <div class="music-player-progress">
-        {% if waves %}<canvas id="music-player-wave" class="music-wave" aria-hidden="true"></canvas>{% else %}<canvas id="music-player-wave" class="music-wave" data-flat aria-hidden="true"></canvas>{% endif %}
-        <input type="range" data-music-seek min="0" max="1000" step="1" value="0" aria-label="{{ '@music.player.seek'|trans }}">
+    <div class="music-player-bar" data-music-drag>
+        <div class="music-player-controls">
+            <button type="button" data-music-prev aria-label="{{ '@music.player.prev'|trans }}"><i class="fa-solid fa-backward-step" aria-hidden="true"></i></button>
+            <button type="button" data-music-toggle aria-pressed="false" aria-label="{{ '@music.player.play'|trans }}" data-label-play="{{ '@music.player.play'|trans }}" data-label-pause="{{ '@music.player.pause'|trans }}"><i class="fa-solid fa-play music-icon-play" aria-hidden="true"></i><i class="fa-solid fa-pause music-icon-pause" aria-hidden="true"></i></button>
+            <button type="button" data-music-next aria-label="{{ '@music.player.next'|trans }}"><i class="fa-solid fa-forward-step" aria-hidden="true"></i></button>
+        </div>
+        <button type="button" class="music-player-cover" data-music-expand aria-expanded="false" aria-controls="music-sheet" aria-label="{{ '@music.player.expand'|trans }}" data-label-expand="{{ '@music.player.expand'|trans }}" data-label-collapse="{{ '@music.player.collapse'|trans }}" hidden><img data-music-cover alt="" draggable="false"></button>
+        <div class="music-player-info" aria-live="polite"><span data-music-title></span><span data-music-release-title></span></div>
+        <div class="music-player-progress">
+            {% if waves %}<canvas id="music-player-wave" class="music-wave" aria-hidden="true"></canvas>{% else %}<canvas id="music-player-wave" class="music-wave" data-flat aria-hidden="true"></canvas>{% endif %}
+            <input type="range" data-music-seek min="0" max="1000" step="1" value="0" aria-label="{{ '@music.player.seek'|trans }}">
+        </div>
+        <span class="music-player-time"><span data-music-time>0:00</span> / <span data-music-duration>0:00</span></span>
+        <div class="music-player-end">
+            {# The 30 seconds of a preview: "listen in full". The platform's player open: "see the album" there. #}
+            <button type="button" class="music-player-full" data-music-full-open hidden title="{{ '@music.full.note'|trans }}">{{ '@music.full.open'|trans }}</button>
+            <a class="music-player-full" data-music-album hidden target="_blank" rel="noopener">{{ '@music.full.album'|trans }}</a>
+            <button type="button" data-music-mute aria-pressed="false" aria-label="{{ '@music.player.mute'|trans }}"><i class="fa-solid fa-volume-high music-icon-sound" aria-hidden="true"></i><i class="fa-solid fa-volume-xmark music-icon-muted" aria-hidden="true"></i></button>
+            <button type="button" class="music-player-close" data-music-tuck aria-label="{{ '@music.player.tuck'|trans }}" title="{{ '@music.player.tuck'|trans }}"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+        </div>
     </div>
-    <span class="music-player-time"><span data-music-time>0:00</span> / <span data-music-duration>0:00</span></span>
-    <div class="music-player-end">
-        <button type="button" data-music-full-open hidden title="{{ '@music.full.note'|trans }}">{{ '@music.full.open'|trans }}</button>
-        <button type="button" data-music-mute aria-pressed="false" aria-label="{{ '@music.player.mute'|trans }}"><i class="fa-solid fa-volume-high music-icon-sound" aria-hidden="true"></i><i class="fa-solid fa-volume-xmark music-icon-muted" aria-hidden="true"></i></button>
-        <button type="button" class="music-player-close" data-music-close aria-label="{{ '@music.player.close'|trans }}" title="{{ '@music.player.close'|trans }}"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
-    </div>
+</div>
+{# The bar put away (its cross, or Escape): the music goes on, and only a bubble stays - the record's
+ # sleeve, edge to edge. Its middle plays and pauses; its outer ring brings the bar back (a line lights
+ # on its edge under the pointer, as on the bar's border); taken and carried, it goes to the nearest corner. #}
+<div class="music-mini" data-music-mini hidden>
+    <img class="music-mini-cover" data-music-cover alt="" draggable="false" hidden>
+    <button type="button" class="music-mini-rim" data-music-untuck aria-label="{{ '@music.player.untuck'|trans }}" title="{{ '@music.player.untuck'|trans }}"></button>
+    <button type="button" class="music-mini-toggle" data-music-toggle aria-pressed="false" aria-label="{{ '@music.player.play'|trans }}" data-label-play="{{ '@music.player.play'|trans }}" data-label-pause="{{ '@music.player.pause'|trans }}"><i class="fa-solid fa-play music-icon-play" aria-hidden="true"></i><i class="fa-solid fa-pause music-icon-pause" aria-hidden="true"></i></button>
 </div>
 <script src="{{ asset('bundles/music/js/player.js') }}" defer></script>

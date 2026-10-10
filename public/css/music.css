@@ -106,8 +106,21 @@
 .music-fold-tracks .music-tracks { margin: .4rem 0 0; }
 
 /* The bar */
-.music-player { position: fixed; left: 0; right: 0; bottom: 0; z-index: 900; display: grid; grid-template-columns: auto minmax(8rem, 16rem) minmax(0, 1fr) auto auto; gap: .9rem; align-items: center; padding: .6rem clamp(.8rem, 3vw, 2rem); background: var(--music-bar-bg, var(--music-bg, #fff)); color: var(--music-fg, #1a1a1a); border-top: 1px solid var(--music-line, rgba(127,127,127,.25)); box-shadow: 0 -.5rem 1.5rem rgba(0,0,0,.08); }
+.music-player { position: fixed; left: 0; right: 0; bottom: 0; z-index: 900; transform: translateY(var(--music-y, 0px)); transition: transform .36s cubic-bezier(.2, .8, .25, 1); background: var(--music-bar-bg, var(--music-bg, #fff)); color: var(--music-fg, #1a1a1a); border-top: 1px solid var(--music-line, rgba(127,127,127,.25)); box-shadow: 0 -.5rem 1.5rem rgba(0,0,0,.08); }
 .music-player[hidden] { display: none; }
+/* The sheet's room above the bar: it opens upwards, as high as --music-open says. */
+.music-sheet-wrap { height: var(--music-open, 0px); overflow: hidden; transition: height .36s cubic-bezier(.2, .8, .25, 1); }
+/* Under the finger: no easing, it is where the finger is. */
+.music-player.is-moving, .music-player.is-moving .music-sheet-wrap { transition: none; }
+@media (prefers-reduced-motion: reduce) { .music-player, .music-sheet-wrap { transition: none; } }
+/* It is the whole top border that is taken: all along it a hand shows, and the border lights up. */
+.music-player .music-player-grabber { position: absolute; left: 0; top: 0; z-index: 1; display: grid; place-items: center; width: 100%; height: 1.3rem; padding: 0; border: 0; border-radius: 0; background: none; translate: 0 -50%; cursor: grab; touch-action: none; }
+.music-player-grabber::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; translate: 0 -50%; background: linear-gradient(90deg, transparent, var(--music-accent, #8a5a2b) 18%, var(--music-accent, #8a5a2b) 82%, transparent); box-shadow: 0 0 .9rem .1rem color-mix(in srgb, var(--music-accent, #8a5a2b) 55%, transparent); opacity: 0; transition: opacity .25s ease; pointer-events: none; }
+.music-player-grabber:hover::before, .music-player-grabber:focus-visible::before, .music-player.is-moving .music-player-grabber::before { opacity: 1; }
+.music-player-grabber:hover span, .music-player.is-moving .music-player.is-moving .music-player-grabber { cursor: grabbing; }
+/* The bar: the sleeve, the controls, what plays, the progress, the time, the end's buttons. */
+.music-player-bar { display: grid; grid-template-columns: auto auto minmax(6rem, 14rem) minmax(0, 1fr) auto auto; gap: .9rem; align-items: center; padding: .6rem clamp(.8rem, 3vw, 2rem); touch-action: none; }
+.music-player-bar:has(.music-player-cover[hidden]) { grid-template-columns: auto minmax(8rem, 16rem) minmax(0, 1fr) auto auto; }
 html.music-playing-bar body { padding-bottom: 4.5rem; }
 .music-player-controls { display: flex; gap: .3rem; align-items: center; }
 .music-player button { display: inline-grid; place-items: center; width: 2.4rem; height: 2.4rem; padding: 0; border: 0; border-radius: 50%; background: none; color: inherit; cursor: pointer; }
@@ -126,8 +139,10 @@ html.music-playing-bar body { padding-bottom: 4.5rem; }
 .music-player-progress input[type="range"]:focus-visible { opacity: .35; }
 .music-player-end { display: flex; gap: .4rem; align-items: center; }
 /* The cross: last in the bar, quieter than what plays, the accent under the pointer. */
-.music-player [data-music-close] { opacity: .7; transition: opacity .2s, color .2s; }
-.music-player [data-music-close]:hover, .music-player [data-music-close]:focus-visible { opacity: 1; color: var(--music-accent, #8a5a2b); }
+/* The bar's round buttons (the neighbouring tracks, the sound, the cross): a light grey disc under the pointer, the accent's when pressed. */
+.music-player-bar button:not([data-music-toggle]):not(.music-player-cover):not(.music-player-full) { transition: background .18s ease, color .18s ease; }
+.music-player-bar button:not([data-music-toggle]):not(.music-player-cover):not(.music-player-full):not(:disabled):hover { background: color-mix(in srgb, currentColor 12%, transparent); }
+.music-player-bar button:not([data-music-toggle]):not(.music-player-cover):not(.music-player-full):not(:disabled):active { background: var(--music-accent, #8a5a2b); color: #fff; }
 .music-player-time { font-size: .82rem; font-variant-numeric: tabular-nums; opacity: .75; white-space: nowrap; }
 .music-player :focus-visible, .music-track-play:focus-visible { outline: 2px solid var(--music-accent, #8a5a2b); outline-offset: 2px; }
 
@@ -142,7 +157,15 @@ html.music-playing-bar body { padding-bottom: 4.5rem; }
 .music-video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr)); gap: 1.25rem; }
 .music-video-card { display: grid; gap: .5rem; color: inherit; text-decoration: none; }
 .music-video-card h3 { margin: 0; font-size: 1.05rem; }
-.music-video-card:hover h3 { color: var(--_accent); }
+.music-video-card h3 a { color: inherit; text-decoration: none; }
+.music-video-card:hover h3, .music-video-card h3 a:hover { color: var(--_accent); }
+/* A film playing where its poster is: silently under the mouse (the button stays over it, to play it for good), then with its own controls. */
+.music-poster.is-preview iframe, .music-poster.is-preview video { pointer-events: none; }
+.music-poster.is-preview .music-poster-play { background: none; z-index: 2; }
+.music-poster.is-preview .music-poster-play i { opacity: 0; }
+.music-poster.is-playing:not(.is-preview) .music-poster-play, .music-poster.is-playing:not(.is-preview) .music-poster-duration { display: none; }
+.music-poster-close { position: absolute; top: .5rem; right: .5rem; z-index: 2; display: grid; place-items: center; width: 2rem; height: 2rem; padding: 0; border: 0; border-radius: 50%; background: rgba(0,0,0,.65); color: #fff; cursor: pointer; }
+.music-poster-close[hidden] { display: none; }
 .music-poster { position: relative; display: block; aspect-ratio: 16 / 9; border-radius: .75rem; overflow: hidden; background: #111; }
 .music-poster img, .music-poster video, .music-poster iframe { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border: 0; }
 .music-poster-play { position: absolute; inset: 0; display: grid; place-items: center; width: 100%; padding: 0; border: 0; background: linear-gradient(transparent 55%, rgba(0,0,0,.45)); color: #fff; cursor: pointer; }
@@ -185,7 +208,8 @@ html.music-playing-bar body { padding-bottom: 4.5rem; }
     .music-featured, .music-release-head, .music-instrument { grid-template-columns: 1fr; }
     .music-track, .music-track.has-wave { grid-template-columns: 2.4rem minmax(0, 1fr) 3rem; }
     .music-track-no, .music-track .music-wave { display: none; }
-    .music-player { grid-template-columns: auto minmax(0, 1fr) auto; gap: .5rem; }
+    .music-player-bar { grid-template-columns: auto auto minmax(0, 1fr) auto; gap: .5rem .6rem; }
+    .music-player-bar:has(.music-player-cover[hidden]) { grid-template-columns: auto minmax(0, 1fr) auto; }
     .music-player-progress { grid-column: 1 / -1; grid-row: 1; }
     /* A phone has its own volume keys: the cross takes the sound button's place, the title keeps its room. */
     .music-player-time, .music-player [data-music-prev], .music-player [data-music-mute] { display: none; }
@@ -200,8 +224,9 @@ html.music-playing-bar body { padding-bottom: 4.5rem; }
 .music-full-frame { margin-top: .9rem; }
 .music-full-frame iframe { display: block; width: 100%; border: 0; border-radius: .75rem; }
 .music-full-note { margin: .6rem 0 0; font-size: .8rem; color: var(--_soft, #6b6b6b); }
-.music-player [data-music-full-open] { width: auto; padding: 0 .9rem; border: 1px solid currentColor; border-radius: 2rem; font-size: .8rem; font-weight: 600; white-space: nowrap; }
-.music-player [data-music-full-open][hidden] { display: none; }
+.music-player .music-player-full { display: inline-grid; place-items: center; width: auto; height: 2.4rem; padding: 0 .9rem; border: 1px solid currentColor; border-radius: 2rem; color: inherit; font-size: .8rem; font-weight: 600; white-space: nowrap; text-decoration: none; }
+.music-player .music-player-full[hidden] { display: none; }
+.music-player a.music-player-full:hover { border-color: var(--music-accent, #8a5a2b); color: var(--music-accent, #8a5a2b); }
 .music-playlists { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 1.25rem; }
 .music-playlist h3 { margin: 0 0 .3rem; font-size: 1.05rem; }
 .music-playlist p { margin: 0 0 .6rem; color: var(--_soft, #6b6b6b); font-size: .9rem; }
@@ -217,3 +242,97 @@ html.music-playing-bar body { padding-bottom: 4.5rem; }
 .is-framing [data-music-hero-media] { cursor: grab; }
 .is-framing { cursor: grab; outline: 2px dashed rgba(255,255,255,.7); outline-offset: -8px; }
 .is-framing:active, .is-framing:active [data-music-hero-media] { cursor: grabbing; }
+
+/* The record's sleeve, small, at the head of the bar: it opens the sheet (and folds it). */
+.music-player { --_sheet: min(20rem, 42vh); }
+.music-player .music-player-cover { width: 2.8rem; height: 2.8rem; border-radius: .2rem; overflow: hidden; transition: transform .2s ease, box-shadow .2s ease; }
+.music-player .music-player-cover[hidden] { display: none; }
+.music-player-cover img, .music-sheet-cover img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.music-player .music-player-cover:hover { transform: scale(1.08); box-shadow: 0 .3rem .8rem rgba(0,0,0,.3); }
+/* The sheet, above the bar: the sleeve large, its title, and the platform's own player once asked for. */
+.music-sheet { display: flex; align-items: flex-start; gap: clamp(1rem, 3vw, 2rem); max-height: calc(100vh - 9rem); max-height: calc(100dvh - 9rem); overflow-y: auto; padding: 1.5rem clamp(.8rem, 3vw, 2rem) .6rem; touch-action: none; }
+.music-player .music-sheet-cover { flex: none; width: var(--_sheet); height: var(--_sheet); border-radius: .25rem; overflow: hidden; box-shadow: 0 1.2rem 2.4rem -1.2rem rgba(0,0,0,.45); cursor: pointer; }
+.music-player .music-sheet-cover[hidden] { display: none; }
+.music-sheet-side { flex: 1; display: grid; gap: .9rem; min-width: 0; align-content: start; }
+.music-sheet-text { display: grid; gap: .3rem; min-width: 0; }
+.music-sheet-text strong { font-size: clamp(1.1rem, 2vw, 1.5rem); line-height: 1.25; }
+.music-sheet-text span { opacity: .7; }
+.music-sheet-text em { font-style: normal; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--music-accent, #8a5a2b); }
+.music-sheet-text em[hidden], .music-sheet-embed[hidden], .music-sheet-platforms[hidden], .music-sheet-note[hidden] { display: none; }
+.music-sheet-embed { touch-action: auto; }
+.music-sheet-embed iframe { display: block; width: 100%; max-height: 46vh; border: 0; border-radius: .75rem; }
+.music-sheet-platforms { display: flex; flex-wrap: wrap; gap: .4rem; }
+.music-player .music-sheet-platforms button { width: auto; height: 2rem; padding: 0 .8rem; border: 1px solid var(--music-line, rgba(127,127,127,.35)); border-radius: 2rem; font-size: .78rem; }
+.music-player .music-sheet-platforms button[aria-pressed="true"] { border-color: var(--music-accent, #8a5a2b); color: var(--music-accent, #8a5a2b); }
+.music-sheet-note { margin: 0; font-size: .78rem; opacity: .65; }
+/* About the record: its kind, year and label, its line, who plays, what it won, how long - and the way to its page. */
+.music-sheet-about { display: grid; gap: .55rem; max-width: 44rem; font-size: .92rem; line-height: 1.5; }
+.music-sheet-about[hidden] { display: none; }
+.music-sheet-about p { margin: 0; }
+.music-sheet-eyebrow { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; opacity: .7; }
+.music-sheet-lead { font-size: 1.05rem; }
+.music-sheet-with { opacity: .8; }
+.music-sheet-awards { display: grid; gap: .25rem; margin: 0; padding: 0; list-style: none; font-size: .86rem; }
+.music-sheet-awards i { margin-right: .35rem; color: var(--music-accent, #8a5a2b); }
+.music-sheet-awards small { opacity: .7; }
+.music-sheet-facts { font-size: .8rem; opacity: .85; }
+.music-sheet-more { margin-left: .9rem; color: var(--music-accent, #8a5a2b); font-weight: 600; text-decoration: none; white-space: nowrap; }
+.music-sheet-more:hover { text-decoration: underline; }
+.music-sheet-more i { font-size: .7em; }
+
+/* The bubble: the bar put away, the music going on - the record's sleeve, play/pause on it, a rim round it. */
+/* (Its first corner is the host's to choose: --music-mini-left / --music-mini-right, the right one by default; carried, it keeps the corner it was left in.) */
+.music-mini { --_edge: 1.5rem; position: fixed; left: var(--music-mini-left, auto); right: var(--music-mini-right, max(var(--_edge), env(safe-area-inset-right))); bottom: calc(var(--_edge) + env(safe-area-inset-bottom)); z-index: 900; width: 3.8rem; height: 3.8rem; color: #fff; touch-action: none; }
+.music-mini[hidden] { display: none; }
+.music-mini[data-corner$="r"] { left: auto; right: max(var(--_edge), env(safe-area-inset-right)); }
+.music-mini[data-corner$="l"] { right: auto; left: max(var(--_edge), env(safe-area-inset-left)); }
+.music-mini[data-corner^="b"] { top: auto; bottom: calc(var(--_edge) + env(safe-area-inset-bottom)); }
+.music-mini[data-corner^="t"] { bottom: auto; top: calc(var(--music-mini-top, 5.5rem) + env(safe-area-inset-top)); }
+/* Carried: where the pointer is, at once; let go: to its corner. */
+.music-mini.is-carried { cursor: grabbing; transition: none; }
+.music-mini.is-landing { transition: transform .38s cubic-bezier(.2, .8, .25, 1); }
+@media (prefers-reduced-motion: no-preference) { .music-mini:not([hidden]):not(.is-carried):not(.is-landing) { animation: music-mini-in .35s cubic-bezier(.2, .8, .25, 1) both; } }
+@keyframes music-mini-in { from { opacity: 0; scale: .4; } to { opacity: 1; scale: 1; } }
+.music-mini button { display: grid; place-items: center; padding: 0; border: 0; background: none; color: inherit; cursor: pointer; touch-action: none; }
+/* The sleeve, edge to edge, under a veil so the sign reads on any picture; the bubble's own colour when there is none. */
+.music-mini { border-radius: 50%; background: var(--music-accent, #8a5a2b); box-shadow: 0 .5rem 1.4rem rgba(0,0,0,.28); }
+.music-mini-cover { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; pointer-events: none; }
+.music-mini::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: rgba(0,0,0,.32); transition: background .2s; pointer-events: none; }
+.music-mini:has(.music-mini-toggle:hover)::after { background: rgba(0,0,0,.44); }
+/* The outer ring (the whole bubble, under the middle): the bar back. The middle: play/pause. Nothing overlaps. */
+.music-mini-rim { position: absolute; inset: 0; z-index: 1; border-radius: 50%; }
+.music-mini-toggle { position: absolute; inset: 22%; z-index: 2; border-radius: 50%; font-size: 1rem; }
+.music-mini-toggle i { filter: drop-shadow(0 1px 3px rgba(0,0,0,.5)); }
+.music-mini .music-icon-pause, .music-mini.is-playing .music-icon-play { display: none; }
+.music-mini.is-playing .music-icon-pause { display: inline; }
+.music-mini .music-icon-play { translate: .08em 0; }
+/* The line on the edge: nothing at rest; faint as the pointer comes on the bubble, lit on the ring itself - as the bar's border. */
+.music-mini-rim::before { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--music-accent, #8a5a2b); box-shadow: 0 0 .9rem .1rem color-mix(in srgb, var(--music-accent, #8a5a2b) 55%, transparent); opacity: 0; transition: opacity .25s ease; pointer-events: none; }
+.music-mini:hover .music-mini-rim::before { opacity: .35; }
+.music-mini .music-mini-rim:hover::before, .music-mini .music-mini-rim:focus-visible::before, .music-mini.is-carried .music-mini-rim::before { opacity: 1; }
+.music-mini :focus-visible { outline: none; }
+.music-mini-toggle:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+/* The sound's pulse: while it plays, a ring breathes out from the bubble and fades - none at rest, none while carried. */
+.music-mini::before { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--music-accent, #8a5a2b); opacity: 0; pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) { .music-mini.is-playing:not(.is-carried)::before { animation: music-ring 2.2s ease-out infinite; } }
+@keyframes music-ring { from { opacity: .7; scale: 1; } to { opacity: 0; scale: 1.45; } }
+/* No pointer to come near with (a phone): the line is there, faint, so the ring can be found. */
+@media (hover: none) { .music-mini-rim::before { opacity: .4; } }
+
+/* A phone: the sleeve above its title, both centred; with the platform's player open, the sleeve gives it the room. */
+@media (max-width: 760px) {
+    .music-player { --_sheet: min(62vw, 34vh); }
+    .music-sheet { flex-direction: column; align-items: center; text-align: center; gap: .9rem; }
+    .music-sheet-side { width: 100%; justify-items: center; }
+    .music-sheet-embed { width: 100%; }
+    .music-player.is-full .music-sheet-cover { display: none; }
+    .music-player .music-player-full { padding: 0 .6rem; font-size: .72rem; }
+}
+
+/* Pulled like a drawer on a phone: the browser's own gestures (selecting the title, dragging the sleeve away, the long-press menu) stay out of it. */
+.music-player-bar, .music-sheet, .music-mini { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.music-player img, .music-mini img { -webkit-user-drag: none; user-select: none; }
+.music-player-bar, .music-sheet { cursor: grab; }
+.music-player.is-moving, .music-player.is-moving * { cursor: grabbing !important; }
+.music-player-bar button, .music-player-bar a, .music-sheet button, .music-sheet a { cursor: pointer; }
+.music-player .music-player-grabber { cursor: grab; }

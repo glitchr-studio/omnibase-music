@@ -54,6 +54,15 @@ final class TrackTest extends TestCase
         self::assertTrue($track->setPreviewUrl('https://audio-ssl.itunes.apple.com/preview.m4a')->hasAudio());
     }
 
+    public function testWholeNeedsAFileOfTheSite(): void
+    {
+        $track = (new Track())->setPreviewUrl('https://audio-ssl.itunes.apple.com/preview.m4a')->setWhole(true);
+        self::assertFalse($track->isWhole(), 'a preview is never the whole track');
+        self::assertTrue($track->setSample('track.mp3')->isWhole());
+        self::assertFalse($track->setWhole(null)->isWhole());
+        self::assertSame(0, $track->getPlays());
+    }
+
     public function testDiscIsOneAtLeast(): void
     {
         self::assertSame(1, (new Track())->setDisc(0)->getDisc());

@@ -8,7 +8,7 @@
 {% set src = video ? (video starts with 'http' or video starts with '/' ? video : video|public) : null %}
 {% set poster_src = poster ? (poster starts with 'http' or poster starts with '/' ? poster : poster|public) : null %}
 {# The frame an administrator chose on the page (music.hero.position, music.hero.zoom), over the host's own. #}
-{% set frame_style = position ? 'object-position: ' ~ position ~ '; transform: scale(' ~ zoom ~ '); transform-origin: ' ~ position ~ '; animation: none;' : '' %}
+{% set frame_style = position ? 'object-position: ' ~ position ~ '; transform: scale(' ~ zoom ~ '); transform-origin: ' ~ position ~ ';' : '' %}
 <div class="music-hero{{ src ? ' has-video' }} {{ attributes.class|default('') }}">
     {% if src %}
     <video autoplay muted loop playsinline preload="metadata"{% if frame_style %} style="{{ frame_style }}"{% endif %} data-music-hero-media{% if poster_src %} poster="{{ poster_src }}"{% endif %} aria-hidden="true">

@@ -38,6 +38,8 @@ links:
 full:
   title: "Écouter en entier sur"
   open: "Écouter en entier"
+  on: "Sur {platform}"
+  album: "❤️ Voir l’album"
   note: "Une écoute sur la plateforme, connecté, compte comme un stream pour l’artiste ; un extrait de 30 secondes ici, non."
 
 embed:
@@ -53,6 +55,10 @@ player:
   seek: "Position dans la plage"
   mute: "Son activé ou coupé"
   close: "Couper la musique et fermer le lecteur"
+  tuck: "Masquer le lecteur (la musique continue)"
+  untuck: "Afficher le lecteur"
+  expand: "Agrandir la pochette"
+  collapse: "Replier le lecteur"
   play_track: "Écouter « {title} »"
   open_embed: "Écouter « {title} » sur une plateforme"
   preview: "Extrait de 30 secondes"
@@ -85,6 +91,7 @@ videos:
   empty: "Pas encore de vidéo."
 
 video:
+  close: "Fermer le film"
   description: "{title} : la vidéo."
   play: "Lire « {title} »"
   consent_youtube: "Lue depuis YouTube (youtube-nocookie.com) quand vous appuyez sur lecture."
@@ -152,6 +159,8 @@ admin:
     instruments: "Instruments"
     latest: "Discographie"
   release:
+    plays: "Écoutes"
+    plays_help: "Les écoutes de ses morceaux sur le site, toutes ensemble ; celles de chaque morceau sont dans sa ligne, plus bas."
     title: "Titre"
     type: "Type"
     label: "Label"
@@ -202,8 +211,12 @@ admin:
     duration: "Durée"
     duration_help: "En secondes."
     isrc: "ISRC"
-    sample: "Extrait"
-    sample_help: "L’extrait du site, joué en premier."
+    sample: "Fichier"
+    sample_help: "Le fichier du site, joué en premier : un extrait, ou le morceau entier (MP3 ou AAC, 64 Mo au plus)."
+    whole: "Morceau entier"
+    whole_help: "Le fichier est le morceau du début à la fin : le site le joue en entier, sans la limite des 30 secondes."
+    plays: "Écoutes"
+    plays_help: "Comptées par le lecteur du site une fois 30 secondes entendues (ou l’essentiel d’un extrait plus court). Les écoutes faites depuis le back-office ne comptent pas."
     preview_url: "Extrait d’un catalogue"
     preview_url_help: "30 secondes d’un catalogue (iTunes), rempli par « Compléter »."
     performers: "Interprètes de cette plage"
@@ -291,3 +304,11 @@ admin:
     upcoming: "Prochain disque"
     none: "Pas encore de disque."
     silent: "{count, plural, =0 {plage sans rien à jouer} one {plage sans rien à jouer} other {plages sans rien à jouer}}"
+    plays: "{count, plural, =0 {écoute sur le site} one {écoute sur le site} other {écoutes sur le site}}"
+
+sheet:
+  more: "Voir le disque"
+# The switch of the platforms' players in omnibase/consent's panel (feature MEDIA, public/js/player.js).
+consent:
+  label: "Lecteurs des plateformes"
+  description: "Spotify, Apple Music, Deezer, YouTube, Vimeo : leur lecteur, chargé quand vous le demandez, dépose ses propres cookies."

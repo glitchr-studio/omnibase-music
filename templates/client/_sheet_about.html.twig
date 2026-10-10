@@ -1,0 +1,17 @@
+{#
+ # What the player's sheet says about the record that plays, beside its
+ # sleeve: its kind and date, the label, its line, who plays, what it won,
+ # how long it is - and the way to its page (music_release_full, fetched
+ # when the sheet opens).
+ #}
+<p class="music-sheet-eyebrow">{{ ('@music.release.type.' ~ release.type.value)|trans }}{{ release.releasedAt ? ' · ' ~ release.releasedAt|date('Y') }}{% if release.label %} · {{ '@music.label.released_by'|trans }} {{ release.label.name }}{% endif %}</p>
+{% if release.headline %}<p class="music-sheet-lead">{{ release.headline }}</p>{% endif %}
+{% set performers_line = music_performers(release) %}
+{% if performers_line %}<p class="music-sheet-with">{{ '@music.release.with'|trans({performers: performers_line}) }}</p>{% endif %}
+{% if release.awardList|length %}
+<ul class="music-sheet-awards">
+    {% for award in release.awardList|slice(0, 3) %}<li><i class="fa-solid fa-award" aria-hidden="true"></i> {{ award.title }}{% if award.by %} <small>— {{ award.by }}</small>{% endif %}</li>{% endfor %}
+</ul>
+{% endif %}
+<p class="music-sheet-facts">{{ '@music.release.tracks'|trans({count: release.tracks|length}) }}{% if release.duration %} · {{ '@music.release.total'|trans({duration: release.duration|music_duration}) }}{% endif %}
+    <a class="music-sheet-more" href="{{ path('music_release', {slug: release.slug}) }}">{{ '@music.sheet.more'|trans }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a></p>

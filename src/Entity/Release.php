@@ -307,6 +307,12 @@ class Release extends Thread implements LinkableInterface
         return $discs;
     }
 
+    /** How many times the site's player played its tracks, all together. */
+    public function getPlays(): int
+    {
+        return array_sum(array_map(static fn (Track $track): int => $track->getPlays(), $this->tracks->toArray()));
+    }
+
     /** Seconds, all tracks together; null as long as one has no duration. */
     public function getDuration(): ?int
     {

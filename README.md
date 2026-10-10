@@ -26,9 +26,10 @@ Six things, each an entity, its back office, its pages and its Twig:
   pattern. `Release::getPlatformLinks()` gives Omnisong's `PlatformLinks`
   with the label first, then its shop, then the platforms by weight.
   A `Track` has its disc and place, its title - or the `Work` it is and the
-  movement - its length, its ISRC, the site's own excerpt (`sample`, an
-  upload), a catalogue's 30 s preview (`previewUrl`) and the excerpt's
-  waveform (`peaks`).
+  movement - its length, its ISRC, the site's own file (`sample`, an
+  upload: an excerpt, or the whole track when `whole` says so), a
+  catalogue's 30 s preview (`previewUrl`), the file's waveform (`peaks`)
+  and how many times the site played it (`plays`).
 - **Repertoire.** A `Work`: the composer, the title and its number
   ("op. 74"), the year, the instrumentation ("harp and orchestra"), the
   formation (solo, chamber, concerto, orchestra, vocal), the period, the
@@ -187,6 +188,33 @@ previews, on a record's page and in the bar while one of its tracks plays,
 "Listen in full on Spotify / Apple Music / Deezer" swaps in the platform's
 own player of the whole record (`music.player.full` says which platforms,
 in which order). Nothing loads from a platform before that click.
+
+**The whole track, on the site.** A catalogue gives 30 seconds; the site
+plays a track in full from a file of its own: upload it on the track
+(64 MB at most) and tick "Whole track" - a box per track, unticked by
+default: nothing plays a work in full unless someone ticked it. The bar then
+has no "Listen in full" for it - it is. **Playing a recording in full on the
+site presumes the agreement of whoever holds its rights** (the label, the
+publisher): get it in writing before ticking the box; an excerpt stays the
+default.
+
+**The platforms' players wait for a yes.** Spotify, Apple Music, Deezer,
+YouTube or Vimeo set their own cookies: with omnibase/consent installed, a
+player of theirs ("Listen in full", the sheet of the bar, a film from a
+platform) loads only once the visitor accepts the `MEDIA` feature - asked on
+the click that wants it, the panel opening, and played as soon as they say
+yes; never on a hover. Its switch is in the panel, named by
+`music.consent.label`.
+
+**Plays.** The player tells the site (`POST /music/play/{id}`,
+`music_track_play`) once a track was heard - 30 seconds of it, or most of a
+shorter excerpt; a jump on the waveform is not listening. `Track::getPlays()`
+is the track's count, `Release::getPlays()` its record's; the back office
+shows both on a record (the list, the record, each track's row) and the
+total on the dashboard's tile. The back office's own listening is not
+counted, the same visitor on the same track once every 20 seconds, and
+nothing about the listener is kept. What plays in a platform's own player
+is counted there, not here.
 
 ### The player's JavaScript API
 

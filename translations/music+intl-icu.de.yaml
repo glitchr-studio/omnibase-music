@@ -38,6 +38,8 @@ links:
 full:
   title: "Vollständig anhören auf"
   open: "Vollständig anhören"
+  on: "Auf {platform}"
+  album: "❤️ Zum Album"
   note: "Ein Abruf auf der Plattform, angemeldet, zählt als Stream für die Künstlerin oder den Künstler; eine 30-Sekunden-Hörprobe hier nicht."
 
 embed:
@@ -53,6 +55,10 @@ player:
   seek: "Position im Titel"
   mute: "Ton an oder aus"
   close: "Musik stoppen und Player schließen"
+  tuck: "Player ausblenden (die Musik läuft weiter)"
+  untuck: "Player einblenden"
+  expand: "Cover vergrößern"
+  collapse: "Player zuklappen"
   play_track: "„{title}“ abspielen"
   open_embed: "„{title}“ auf einer Plattform anhören"
   preview: "30-Sekunden-Hörprobe"
@@ -85,6 +91,7 @@ videos:
   empty: "Noch kein Video."
 
 video:
+  close: "Film schließen"
   description: "{title}: das Video."
   play: "„{title}“ abspielen"
   consent_youtube: "Wird von YouTube (youtube-nocookie.com) abgespielt, sobald Sie Play drücken."
@@ -152,6 +159,8 @@ admin:
     instruments: "Instrumente"
     latest: "Diskografie"
   release:
+    plays: "Wiedergaben"
+    plays_help: "Die Wiedergaben seiner Stücke auf der Website, alle zusammen; die jedes Stücks stehen in seiner Zeile weiter unten."
     title: "Titel"
     type: "Art"
     label: "Label"
@@ -202,8 +211,12 @@ admin:
     duration: "Dauer"
     duration_help: "In Sekunden."
     isrc: "ISRC"
-    sample: "Hörprobe"
-    sample_help: "Die eigene Hörprobe der Website, wird zuerst gespielt."
+    sample: "Datei"
+    sample_help: "Die eigene Datei der Website, zuerst gespielt: ein Ausschnitt oder das ganze Stück (MP3 oder AAC, höchstens 64 MB)."
+    whole: "Ganzes Stück"
+    whole_help: "Die Datei ist das Stück von Anfang bis Ende: Die Website spielt es ganz, ohne die 30-Sekunden-Grenze."
+    plays: "Wiedergaben"
+    plays_help: "Vom Player der Website gezählt, sobald 30 Sekunden gehört wurden (oder der größte Teil eines kürzeren Ausschnitts). Das Hören aus dem Backoffice zählt nicht."
     preview_url: "Hörprobe eines Katalogs"
     preview_url_help: "30 Sekunden aus einem Katalog (iTunes), von „Vervollständigen“ gefüllt."
     performers: "Mitwirkende dieses Titels"
@@ -291,3 +304,11 @@ admin:
     upcoming: "Nächstes Album"
     none: "Noch kein Album."
     silent: "{count, plural, =0 {Titel ohne Abspielbares} one {Titel ohne Abspielbares} other {Titel ohne Abspielbares}}"
+    plays: "{count, plural, =0 {Wiedergaben auf der Website} one {Wiedergabe auf der Website} other {Wiedergaben auf der Website}}"
+
+sheet:
+  more: "Zum Album"
+# The switch of the platforms' players in omnibase/consent's panel (feature MEDIA, public/js/player.js).
+consent:
+  label: "Player der Plattformen"
+  description: "Spotify, Apple Music, Deezer, YouTube, Vimeo: ihr Player, geladen, wenn Sie ihn anfordern, setzt eigene Cookies."

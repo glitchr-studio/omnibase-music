@@ -7,11 +7,15 @@ use Base\Music\Enum\PlaylistKind;
 use Base\Music\Repository\InstrumentRepository;
 use Base\Music\Repository\PlaylistRepository;
 use Base\Music\Repository\ReleaseRepository;
+use Base\Music\Repository\TrackRepository;
 use Base\Music\Repository\VideoRepository;
 use Base\Music\Repository\WorkRepository;
 use Base\Music\Service\JsonLd;
+use Base\Music\Service\Player;
+use Base\Music\Service\Plays;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -30,7 +34,10 @@ class MusicController extends AbstractController
         private readonly WorkRepository $works,
         private readonly InstrumentRepository $instruments,
         private readonly PlaylistRepository $playlists,
+        private readonly TrackRepository $tracks,
+        private readonly Plays $plays,
         private readonly JsonLd $jsonLd,
+        private readonly Player $player,
         #[Autowire('%music.jsonld%')] private readonly bool $withJsonLd = true,
         #[Autowire('%music.repertoire.enabled%')] private readonly bool $repertoire = true,
         #[Autowire('%music.repertoire.group_by%')] private readonly string $groupBy = WorkRepository::BY_FORMATION,
@@ -110,6 +117,53 @@ class MusicController extends AbstractController
             'instrument' => $instruments[0],
             'others' => \array_slice($instruments, 1),
         ]);
+    }
+
+    /**
+     * For the player's bar, wherever the visitor is: what its sheet says about
+     * the record, and "listen in full" - per platform, the iframe of the whole release (built by player.js only
+     * when asked for) and the record's page there, for "See the album".
+     */
+    #[Route('/music/{slug}/full', name: 'music_release_full', requirements: ['slug' => '[a-z0-9\-]+'], methods: ['GET'], format: 'json')]
+    public function full(string $slug): JsonResponse
+    {
+        $release = $this->releases->findOnePublished($slug)
+            ?? throw $this->createNotFoundException(sprintf('No published release "%s".', $slug));
+        $page = $this->generateUrl('music_release', ['slug' => $release->getSlug()], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $response = $this->json([
+            'release' => $release->getSlug(),
+            'title' => $release->getTitle(),
+            'page' => $page,
+            'platforms' => $this->player->listen($release, $page),
+            // The sheet's words about the record, in the reader's language.
+            'about' => $this->renderView('@Music/client/_sheet_about.html.twig', ['release' => $release]),
+        ]);
+        $response->headers->set('X-Robots-Tag', 'noindex');
+
+        return $response->setPublic()->setMaxAge(300);
+    }
+
+    /**
+     * One play of a track, told by player.js once the visitor has heard it
+     * (Service\Plays: once at a time for the same visitor, never a robot's).
+     * The people of the back office are not counted.
+     */
+    #[Route('/music/play/{id}', name: 'music_track_play', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function play(int $id, Request $request): Response
+    {
+        $track = $this->tracks->find($id);
+        $release = $track?->getRelease();
+        if (null === $release || $this->releases->findOnePublished((string) $release->getSlug()) !== $release) {
+            throw $this->createNotFoundException(sprintf('No track %d on a published release.', $id));
+        }
+        $response = new Response(null, Response::HTTP_NO_CONTENT, ['X-Robots-Tag' => 'noindex']);
+        if ($this->isGranted('ROLE_STAFF')) {
+            return $response;
+        }
+        $this->plays->count($track, $request->getClientIp(), $request->headers->get('User-Agent'));
+
+        return $response;
     }
 
     /** Last, so /music/{slug} never takes another page's path. */

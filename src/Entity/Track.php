@@ -11,7 +11,9 @@ use Symfony\Component\HttpFoundation\File\File;
  * One recording of a release: its disc and its place, its title - or the
  * work it is (Work) and which movement - its length, the ISRC that names it
  * everywhere, and what the site's player plays for it: the site's own
- * excerpt (sample) first, else a catalogue's 30 seconds (previewUrl).
+ * file (sample) first - an excerpt, or the whole track (whole) - else a
+ * catalogue's 30 seconds (previewUrl). plays counts the times the site's
+ * player played it (TrackRepository::countPlay()).
  * The peaks are the excerpt's waveform, computed once (Service\Peaks,
  * `music:peaks`) and drawn by player.js with no decoding in the browser.
  */
@@ -58,10 +60,18 @@ class Track
     #[ORM\Column(length: 500, nullable: true)]
     protected ?string $previewUrl = null;
 
-    /** The site's own excerpt: an upload, played before any preview. */
+    /** The site's own file: an upload, played before any preview. */
     #[ORM\Column(type: 'text', nullable: true)]
-    #[Uploader(max_size: '32MB', mime_types: ['audio/*'])]
+    #[Uploader(max_size: '64MB', mime_types: ['audio/*'])]
     protected $sample = null;
+
+    /** The file is the whole track, not an excerpt of it. */
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    protected bool $whole = false;
+
+    /** How many times the site's player played it. */
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    protected int $plays = 0;
 
     /** @var list<float>|null ~200 values in 0..1: the static waveform of the excerpt */
     #[ORM\Column(type: 'json', nullable: true)]
@@ -145,6 +155,20 @@ class Track
 
     public function getSample(): ?string { return Uploader::getPublic($this, 'sample'); }
     public function getSampleFile(): ?File { return Uploader::get($this, 'sample'); }
+    /**
+     * The file's address on the site ("/uploads/..."), what the player loads: the upload's own path is the file's
+     * on disk (/srv/app/public/uploads/...), which no browser can load.
+     */
+    public function getSampleUrl(): ?string
+    {
+        $path = $this->hasSample() ? $this->getSample() : null;
+        if (null === $path || '' === $path) {
+            return null;
+        }
+        $public = strpos($path, '/public/');
+
+        return false !== $public ? substr($path, $public + \strlen('/public')) : $path;
+    }
     public function setSample($sample): self
     {
         // Another excerpt (a new upload) or none any more: the waveform goes with it.
@@ -157,6 +181,12 @@ class Track
     }
 
     public function hasSample(): bool { return null !== $this->sample && '' !== $this->sample && [] !== $this->sample; }
+
+    /** The site plays the track from its first note to its last: a file of its own, said to be whole. */
+    public function isWhole(): bool { return $this->whole && $this->hasSample(); }
+    public function setWhole(?bool $whole): self { $this->whole = (bool) $whole; return $this; }
+
+    public function getPlays(): int { return $this->plays; }
 
     /** Something an <audio> can play: the site's excerpt or a catalogue's preview. */
     public function hasAudio(): bool

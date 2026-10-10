@@ -38,6 +38,8 @@ links:
 full:
   title: "Listen in full on"
   open: "Listen in full"
+  on: "On {platform}"
+  album: "❤️ See the album"
   note: "A play on the platform, logged in, counts as a stream for the artist; a 30-second preview here does not."
 
 embed:
@@ -53,6 +55,10 @@ player:
   seek: "Position in the track"
   mute: "Sound on or off"
   close: "Stop the music and close the player"
+  tuck: "Hide the player (the music goes on)"
+  untuck: "Show the player"
+  expand: "Show the sleeve large"
+  collapse: "Fold the player"
   play_track: "Play “{title}”"
   open_embed: "Listen to “{title}” on a platform"
   preview: "30-second preview"
@@ -85,6 +91,7 @@ videos:
   empty: "No video yet."
 
 video:
+  close: "Close the film"
   description: "{title}: the video."
   play: "Play “{title}”"
   consent_youtube: "Played from YouTube (youtube-nocookie.com) once you press play."
@@ -152,6 +159,8 @@ admin:
     instruments: "Instruments"
     latest: "Discography"
   release:
+    plays: "Plays"
+    plays_help: "The plays of its tracks on the site, all together; each track's own count is in its row below."
     title: "Title"
     type: "Type"
     label: "Label"
@@ -202,8 +211,12 @@ admin:
     duration: "Length"
     duration_help: "In seconds."
     isrc: "ISRC"
-    sample: "Excerpt"
-    sample_help: "The site's own excerpt, played first."
+    sample: "File"
+    sample_help: "The site's own file, played first: an excerpt, or the whole track (MP3 or AAC, 64 MB at most)."
+    whole: "Whole track"
+    whole_help: "The file is the track from end to end: the site plays it in full, with no 30-second limit."
+    plays: "Plays"
+    plays_help: "Counted by the site's player once 30 seconds were heard (or most of a shorter excerpt). The back office's own listening is not counted."
     preview_url: "Catalogue preview"
     preview_url_help: "30 seconds from a catalogue (iTunes), filled by “Complete”."
     performers: "Performers on this track"
@@ -291,3 +304,11 @@ admin:
     upcoming: "Next release"
     none: "No record yet."
     silent: "{count, plural, =0 {track with nothing to play} one {track with nothing to play} other {tracks with nothing to play}}"
+    plays: "{count, plural, =0 {plays on the site} one {play on the site} other {plays on the site}}"
+
+sheet:
+  more: "The record"
+# The switch of the platforms' players in omnibase/consent's panel (feature MEDIA, public/js/player.js).
+consent:
+  label: "Platforms' players"
+  description: "Spotify, Apple Music, Deezer, YouTube, Vimeo: their player, loaded when you ask for it, sets its own cookies."

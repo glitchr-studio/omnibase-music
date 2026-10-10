@@ -92,7 +92,6 @@ class Video extends Thread implements LinkableInterface
     }
 
     public function getFile(): ?string { return Uploader::getPublic($this, 'file'); }
-    public function getFileFile(): ?File { return Uploader::get($this, 'file'); }
     public function setFile($file): self { $this->file = $file; return $this; }
 
     public function getYoutubeId(): ?string { return $this->youtubeId; }

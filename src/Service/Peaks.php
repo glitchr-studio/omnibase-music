@@ -52,12 +52,27 @@ class Peaks
 
     /**
      * Computes and sets the peaks of a track's excerpt (nothing is flushed).
-     * False when there is no excerpt, no ffmpeg, or a file it cannot read.
+     * Of the uploaded excerpt, or else of the platform's preview. False when
+     * there is neither, no ffmpeg, or a file it cannot read.
      */
     public function compute(Track $track, int $count = self::COUNT): bool
     {
-        if (!$track->hasSample() || !$this->isAvailable()) {
+        if (!$this->isAvailable()) {
             return false;
+        }
+        if (!$track->hasSample()) {
+            // No excerpt of its own: the platform's preview (an https address ffmpeg reads itself).
+            $preview = $track->getPreviewUrl();
+            if (null === $preview || !str_starts_with($preview, 'https://')) {
+                return false;
+            }
+            $peaks = $this->ofFile($preview, $count);
+            if (null === $peaks) {
+                return false;
+            }
+            $track->setPeaks($peaks);
+
+            return true;
         }
         try {
             $path = $track->getSampleFile()?->getPathname();

@@ -10,6 +10,13 @@
 <button type="button" class="music-track-play"
     {%- if source %} data-music-track data-src="{{ source.src }}" data-kind="{{ source.kind }}"{% else %} disabled{% endif %}
     data-title="{{ label }}" data-release="{{ release ? release.slug }}" data-release-title="{{ release ? release.title }}"
+    {%- if release and release.artwork %} data-cover="{{ release.artwork }}"{% endif %}
+    {#- "Listen in full" from the bar, on any page: where it asks for the release's platforms. #}
+    {%- if music_has_full(release) %} data-full="{{ path('music_release_full', {slug: release.slug}) }}"{% endif %}
+    {#- A play of it is counted there, once it was heard (player.js). #}
+    {%- if source and source.kind != 'embed' and track.id %} data-count="{{ path('music_track_play', {id: track.id}) }}"{% endif %}
+    {%- if source and source.whole %} data-whole{% endif %}
+    {%- if release %} data-about="{{ path('music_release_full', {slug: release.slug}) }}"{% endif %}
     {%- if track.peaks %} data-peaks="{{ track.peaks|json_encode }}"{% endif %}
     aria-pressed="false" aria-label="{{ (source and source.kind == 'embed' ? '@music.player.open_embed' : '@music.player.play_track')|trans({title: label}) }}">
     <i class="fa-solid {{ source and source.kind == 'embed' ? 'fa-up-right-from-square' : 'fa-play' }} music-icon-play" aria-hidden="true"></i><i class="fa-solid fa-pause music-icon-pause" aria-hidden="true"></i>

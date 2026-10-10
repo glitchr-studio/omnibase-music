@@ -30,6 +30,12 @@ return function (ContainerConfigurator $configurator) {
     $services->load('Base\\Music\\Controller\\Client\\', $src.'/Controller/Client/')
         ->tag('controller.service_arguments');
 
+    // The plays a robot sends are not counted: omnibase's user-agent classifier, when the core has it.
+    if (class_exists('Base\\Service\\Analytics\\UserAgentClassifier')) {
+        $services->get('Base\\Music\\Service\\Plays')
+            ->arg('$classifier', service('Base\\Service\\Analytics\\UserAgentClassifier')->nullOnInvalid());
+    }
+
     if (class_exists('Base\\Admin\\Controller\\AbstractCrudController')) {
         $services->load('Base\\Music\\Controller\\Admin\\', $src.'/Controller/Admin/')
             ->tag('controller.service_arguments');

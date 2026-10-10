@@ -10,7 +10,7 @@ use Base\Music\Repository\TrackRepository;
 /**
  * The dashboard's tile: the last record out, the next one announced, and
  * how many tracks the player has nothing to play for (no excerpt, no
- * preview). `yield MenuItem::block('music_latest', ...)` in the
+ * preview), and how many times the site's player played. `yield MenuItem::block('music_latest', ...)` in the
  * dashboard's configureWidgetItems() places it.
  */
 final class LatestReleaseWidgetType implements DashboardWidgetTypeInterface
@@ -37,6 +37,7 @@ final class LatestReleaseWidgetType implements DashboardWidgetTypeInterface
             'latest' => $this->releases->findLatest(1)[0] ?? null,
             'upcoming' => $this->releases->findUpcoming()[0] ?? null,
             'silent' => $this->tracks->countSilent(),
+            'plays' => $this->tracks->countPlays(),
         ];
     }
 }
